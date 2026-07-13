@@ -7,9 +7,11 @@ import { useSession } from "@/lib/auth-client";
 export default function DashboardHeader() {
   const { data: sessionData } = useSession();
   const [isDark, setIsDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   // Sync initial theme status on mount
   useEffect(() => {
+    setMounted(true);
     if (typeof window !== "undefined") {
       setIsDark(document.documentElement.classList.contains("dark"));
     }
@@ -24,6 +26,10 @@ export default function DashboardHeader() {
       document.documentElement.classList.remove("dark");
     }
   };
+
+  const userInitials = mounted && sessionData?.user?.name
+    ? sessionData.user.name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()
+    : "JD";
 
   return (
     <header className="sticky top-0 z-40 w-full h-16 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white flex items-center justify-between px-8 select-none transition-colors duration-150 font-sans shadow-xs">
@@ -83,7 +89,7 @@ export default function DashboardHeader() {
 
         {/* User Mini Avatar */}
         <div className="w-7.5 h-7.5 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-[10px] font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer flex items-center justify-center">
-          {(sessionData?.user?.name || "JD").split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()}
+          {userInitials}
         </div>
       </div>
     </header>

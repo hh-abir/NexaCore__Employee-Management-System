@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./config/auth";
 import hrRoutes from "./routes/hrRoutes";
+import projectRoutes from "./routes/projectRoutes";
 
 dotenv.config();
 
@@ -24,8 +25,9 @@ app.all("/api/auth/*path", toNodeHandler(auth));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Mount routes: aligns path to client endpoint demands (POST /api/hr/employees)
+// Mount routes: aligns path to client endpoint demands
 app.use("/api/hr", hrRoutes);
+app.use("/api/projects", projectRoutes);
 
 // General status route
 app.get("/health", (req, res) => {

@@ -26,6 +26,15 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  // Project Relations
+  managedProjects Project[] @relation("ProjectManager")
+  projectIds      String[]  @db.ObjectId
+  projects        Project[] @relation("ProjectEmployees", fields: [projectIds], references: [id])
+
+  // Message and Task Relations
+  messages        Message[]
+  assignedTasks   Task[]
+
   @@map("user")
 }
 
@@ -71,4 +80,86 @@ model Verification {
   updatedAt  DateTime? @updatedAt
 
   @@map("verification")
+}
+
+model Project {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  status      String    @default("ACTIVE") // ACTIVE, COMPLETED
+  budget      Float     @default(0.0)
+  client      String?
+  startDate   DateTime?
+  endDate     DateTime?
+  priority    String    @default("MEDIUM") // LOW, MEDIUM, HIGH
+  category    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Manager relation (PM / HR)
+  managerId   String    @db.ObjectId
+  manager     User      @relation("ProjectManager", fields: [managerId], references: [id])
+
+  // Employee relations
+  employeeIds String[]  @db.ObjectId
+  employees   User[]    @relation("ProjectEmployees", fields: [employeeIds], references: [id])
+
+  // Channel & Task child relations
+  channels    Channel[]
+  tasks       Task[]
+
+  @@map("project")
+}
+
+model Channel {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Parent Project relation
+  projectId String    @db.ObjectId
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Message relation
+  messages  Message[]
+
+  @@map("channel")
+}
+
+model Message {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Sender relation
+  senderId  String   @db.ObjectId
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  // Channel relation
+  channelId String   @db.ObjectId
+  channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@map("message")
+}
+
+model Task {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  column      String    @default("TODO") // TODO, IN_PROGRESS, TESTING, COMPLETED
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Parent Project relation
+  projectId   String    @db.ObjectId
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Assignee relation
+  assigneeId  String?   @db.ObjectId
+  assignee    User?     @relation(fields: [assigneeId], references: [id])
+
+  @@map("task")
 }
