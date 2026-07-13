@@ -82,6 +82,8 @@ const getPriorityBadgeClass = (priority: string) => {
   }
 };
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 export default function DashboardPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -258,7 +260,7 @@ export default function DashboardPage() {
 
   // Selected Channel hook: load messages & start polling
   useEffect(() => {
-    let interval: any;
+    let interval: NodeJS.Timeout;
     if (selectedChannel) {
       fetchChannelMessages(selectedChannel.id);
       // Auto poll messages every 4 seconds to keep chat alive
@@ -287,7 +289,7 @@ export default function DashboardPage() {
   const fetchProjects = async () => {
     setLoadingProjects(true);
     try {
-      const res = await fetch("http://localhost:5000/api/projects/my-projects", {
+      const res = await fetch(`${API_BASE_URL}/api/projects/my-projects`, {
         credentials: "include"
       });
       const data = await res.json();
@@ -304,7 +306,7 @@ export default function DashboardPage() {
   const fetchFreeEmployees = async () => {
     setLoadingFree(true);
     try {
-      const res = await fetch("http://localhost:5000/api/projects/free-employees", {
+      const res = await fetch(`${API_BASE_URL}/api/projects/free-employees`, {
         credentials: "include"
       });
       const data = await res.json();
@@ -320,7 +322,7 @@ export default function DashboardPage() {
 
   const fetchManagers = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/projects/managers", {
+      const res = await fetch(`${API_BASE_URL}/api/projects/managers`, {
         credentials: "include"
       });
       const data = await res.json();
@@ -338,7 +340,7 @@ export default function DashboardPage() {
       "Are you sure you want to approve and activate this project? This will initialize the communication channels and Kanban board for assigned team members.",
       async () => {
         try {
-          const res = await fetch(`http://localhost:5000/api/projects/${projectId}/approve`, {
+          const res = await fetch(`${API_BASE_URL}/api/projects/${projectId}/approve`, {
             method: "PATCH",
             credentials: "include"
           });
@@ -360,7 +362,7 @@ export default function DashboardPage() {
   const fetchProjectTasks = async (projectId: string) => {
     setLoadingTasks(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/projects/${projectId}/tasks`, {
+      const res = await fetch(`${API_BASE_URL}/api/projects/${projectId}/tasks`, {
         credentials: "include"
       });
       const data = await res.json();
@@ -376,7 +378,7 @@ export default function DashboardPage() {
 
   const fetchProjectChannels = async (projectId: string) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/projects/${projectId}/channels`, {
+      const res = await fetch(`${API_BASE_URL}/api/projects/${projectId}/channels`, {
         credentials: "include"
       });
       const data = await res.json();
@@ -399,7 +401,7 @@ export default function DashboardPage() {
 
   const fetchChannelMessages = async (channelId: string, isSilent = false) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/projects/channels/${channelId}/messages`, {
+      const res = await fetch(`${API_BASE_URL}/api/projects/channels/${channelId}/messages`, {
         credentials: "include"
       });
       const data = await res.json();
@@ -417,7 +419,7 @@ export default function DashboardPage() {
     if (!projName) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/projects", {
+      const res = await fetch(`${API_BASE_URL}/api/projects`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -464,7 +466,7 @@ export default function DashboardPage() {
     if (!taskTitle || !selectedProject) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/projects/${selectedProject.id}/tasks`, {
+      const res = await fetch(`${API_BASE_URL}/api/projects/${selectedProject.id}/tasks`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -491,7 +493,7 @@ export default function DashboardPage() {
 
   const handleMoveTask = async (taskId: string, targetCol: string) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/projects/tasks/${taskId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/projects/tasks/${taskId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ column: targetCol }),
@@ -511,7 +513,7 @@ export default function DashboardPage() {
       "Are you sure you want to permanently delete this task? This action cannot be undone.",
       async () => {
         try {
-          const res = await fetch(`http://localhost:5000/api/projects/tasks/${taskId}`, {
+          const res = await fetch(`${API_BASE_URL}/api/projects/tasks/${taskId}`, {
             method: "DELETE",
             credentials: "include"
           });
@@ -532,7 +534,7 @@ export default function DashboardPage() {
     if (!newMessage.trim() || !selectedChannel) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/projects/channels/${selectedChannel.id}/messages`, {
+      const res = await fetch(`${API_BASE_URL}/api/projects/channels/${selectedChannel.id}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: newMessage }),
