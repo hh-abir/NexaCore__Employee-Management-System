@@ -21,7 +21,13 @@ export default function DashboardLayout({
 
         {/* Dynamic Page Content Viewport */}
         <main className="flex-grow p-8 flex flex-col">
-          {children}
+          <Suspense fallback={
+            <div className="flex-grow flex items-center justify-center text-xs font-bold text-slate-400 dark:text-zinc-500">
+              Loading workspace console...
+            </div>
+          }>
+            {children}
+          </Suspense>
         </main>
       </div>
     </div>
