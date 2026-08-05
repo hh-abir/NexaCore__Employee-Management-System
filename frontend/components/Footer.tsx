@@ -6,7 +6,7 @@ export default function Footer() {
     <footer className="bg-slate-900 text-slate-400 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-12">
-          {/* Logo & Description */}
+          {}
           <div className="col-span-2 space-y-6">
             <Link href="/" className="flex items-center gap-2 group">
               <div className="p-2 rounded-lg bg-blue-600 text-white">
@@ -45,7 +45,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Product links */}
+          {}
           <div>
             <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-4">
               Product
@@ -74,7 +74,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Company links */}
+          {}
           <div>
             <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-4">
               Company
@@ -103,7 +103,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Legal links */}
+          {}
           <div>
             <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-4">
               Legal

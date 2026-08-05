@@ -24,7 +24,7 @@ export default function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 h-16 w-full bg-white dark:bg-black border-b border-neutral-200 dark:border-neutral-800 transition-colors duration-150">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
         <div className="flex justify-between items-center h-full">
-          {/* Logo */}
+          {}
           <div className="flex-shrink-0 flex items-center">
             <Link href="/" className="flex items-center gap-3.5">
               <img src="/logo.jpg" alt="NexaCore Logo" className="w-12 h-12 rounded-xl object-cover border border-slate-100" />
@@ -34,7 +34,7 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Links (Center) */}
+          {}
           <div className="hidden md:flex items-center space-x-6">
             {navLinks.map((link) => (
               <Link
@@ -56,7 +56,7 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Buttons (Right) */}
+          {}
           <div className="hidden md:flex items-center space-x-3">
             {sessionData ? (
               <div className="flex items-center gap-4">
@@ -86,7 +86,7 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
+          {}
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -99,7 +99,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {}
       <div className={`md:hidden absolute top-16 left-0 right-0 w-full bg-white dark:bg-black border-b border-neutral-200 dark:border-neutral-800 transition-all duration-200 ${
         isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0 overflow-hidden pointer-events-none"
       }`}>

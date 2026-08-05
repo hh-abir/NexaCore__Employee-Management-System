@@ -2,11 +2,11 @@ import { Response } from "express";
 import { prisma } from "../config/db";
 import { AuthenticatedRequest } from "../middlewares/roleGuard";
 
-// ==========================================
-// 1. Projects Management
-// ==========================================
 
-// Create a new project with automatically generated default channels
+
+
+
+
 export const createProject = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { 
@@ -40,7 +40,7 @@ export const createProject = async (req: AuthenticatedRequest, res: Response) =>
       return res.status(400).json({ error: "A project can have a maximum of 5 employees." });
     }
 
-    // Verify employee limits (must be assigned to less than 2 active projects)
+    
     if (assignedIds.length > 0) {
       const employees = await prisma.user.findMany({
         where: { id: { in: assignedIds } },
@@ -60,7 +60,7 @@ export const createProject = async (req: AuthenticatedRequest, res: Response) =>
       }
     }
 
-    // Transactionally create project & default channels
+    
     const project = await prisma.project.create({
       data: {
         name,
@@ -74,7 +74,7 @@ export const createProject = async (req: AuthenticatedRequest, res: Response) =>
         endDate: endDate ? new Date(endDate) : null,
         priority: priority || "MEDIUM",
         category: category || null,
-        // Establish the backplane relations (connects users)
+        
         employees: {
           connect: assignedIds.map((id: string) => ({ id }))
         },
@@ -99,7 +99,7 @@ export const createProject = async (req: AuthenticatedRequest, res: Response) =>
   }
 };
 
-// Retrieve employees who have less than 2 active projects
+
 export const getFreeEmployees = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const employees = await prisma.user.findMany({
@@ -111,7 +111,7 @@ export const getFreeEmployees = async (req: AuthenticatedRequest, res: Response)
       }
     });
 
-    // Filter employees assigned to < 2 active projects
+    
     const freeEmployees = employees.filter(emp => emp.projects.length < 2);
 
     return res.status(200).json({ 
@@ -128,7 +128,7 @@ export const getFreeEmployees = async (req: AuthenticatedRequest, res: Response)
   }
 };
 
-// Get projects for the currently authenticated user
+
 export const getMyProjects = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user!.id;
@@ -137,7 +137,7 @@ export const getMyProjects = async (req: AuthenticatedRequest, res: Response) =>
     let projects;
 
     if (userRole === "HR") {
-      // HR sees all system projects (both active and pending approval)
+      
       projects = await prisma.project.findMany({
         include: {
           manager: { select: { id: true, name: true, email: true } },
@@ -146,7 +146,7 @@ export const getMyProjects = async (req: AuthenticatedRequest, res: Response) =>
         }
       });
     } else if (userRole === "EMPLOYEE") {
-      // Employees see projects they are assigned to that are ACTIVE
+      
       projects = await prisma.project.findMany({
         where: {
           employeeIds: { has: userId },
@@ -159,7 +159,7 @@ export const getMyProjects = async (req: AuthenticatedRequest, res: Response) =>
         }
       });
     } else {
-      // Project Manager sees projects they manage or are assigned to
+      
       projects = await prisma.project.findMany({
         where: {
           OR: [
@@ -182,7 +182,7 @@ export const getMyProjects = async (req: AuthenticatedRequest, res: Response) =>
   }
 };
 
-// Retrieve all project managers in the system (restricted to HR)
+
 export const getManagers = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const managers = await prisma.user.findMany({
@@ -201,7 +201,7 @@ export const getManagers = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
-// Approve a pending project (restricted to the assigned PROJECT_MANAGER)
+
 export const approveProject = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const projectId = req.params.projectId as string;

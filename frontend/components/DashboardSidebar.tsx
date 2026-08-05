@@ -58,7 +58,7 @@ export default function DashboardSidebar() {
   const isHrOrPm = sessionData?.user?.role === "HR" || sessionData?.user?.role === "PROJECT_MANAGER";
   const isHr = sessionData?.user?.role === "HR";
 
-  // Hydration-safe profile values
+  
   const userInitials = mounted && sessionData?.user?.name
     ? sessionData.user.name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()
     : "JD";
@@ -86,8 +86,8 @@ export default function DashboardSidebar() {
           href: "#",
           icon: Briefcase,
           subItems: [
-            { name: "Active Projects", href: "/dashboard?tab=Projects" },
-            ...(isHr ? [{ name: "Add Project", href: "/dashboard?tab=Projects&create=true" }] : [])
+            { name: "Active Projects", href: "/dashboard/active-projects" },
+            ...(isHr ? [{ name: "Add Project", href: "/dashboard/create-project" }] : [])
           ]
         }
       ]
@@ -115,7 +115,7 @@ export default function DashboardSidebar() {
     },
   ];
 
-  // Auto-expand menus that contain the currently active route on load
+  
   useEffect(() => {
     const nextExpanded: Record<string, boolean> = {};
     const tabVal = searchParams.get("tab");
@@ -124,13 +124,7 @@ export default function DashboardSidebar() {
       group.items.forEach(item => {
         if (item.subItems) {
           const hasActiveSub = item.subItems.some(sub => {
-            const basePath = sub.href.split("?")[0];
-            const isBaseMatch = pathname === basePath;
-
-            if (sub.href.includes("tab=Projects")) {
-              return isBaseMatch && tabVal === "Projects";
-            }
-            return isBaseMatch;
+            return pathname === sub.href;
           });
 
           if (hasActiveSub) {
@@ -152,10 +146,10 @@ export default function DashboardSidebar() {
   return (
     <aside className="w-64 h-screen fixed left-0 top-0 flex flex-col justify-between bg-white dark:bg-zinc-950 text-slate-900 dark:text-white transition-colors duration-150 select-none border-r border-slate-50 dark:border-zinc-900/50 font-sans z-30">
       
-      {/* Upper Content Area */}
+      {}
       <div className="flex flex-col flex-grow min-h-0">
         
-        {/* Minimalist Branding Header */}
+        {}
         <div className="h-16 px-6 flex items-center gap-2.5">
           <img src="/logo.jpg" alt="NexaCore" className="w-8 h-8 rounded-lg object-cover border border-slate-100 dark:border-zinc-800" />
           <span className="text-sm font-bold tracking-tight text-zinc-900 dark:text-white">
@@ -163,7 +157,7 @@ export default function DashboardSidebar() {
           </span>
         </div>
 
-        {/* Scrollable Navigation Groups */}
+        {}
         <div className="flex-grow overflow-y-auto px-4 py-4 space-y-5">
           {menuGroups.map((group, groupIdx) => (
             <div key={groupIdx} className="space-y-1.5">
@@ -225,11 +219,7 @@ export default function DashboardSidebar() {
                           {isExpanded && (
                             <ul className="pl-5.5 space-y-0.5 border-l border-slate-100 dark:border-zinc-900 ml-6 mt-1 text-left">
                               {item.subItems!.map((sub, subIdx) => {
-                                const isSubActive = pathname === sub.href.split("?")[0] && (
-                                  !sub.href.includes("tab=Projects") || tabVal === "Projects"
-                                ) && (
-                                  !sub.href.includes("create=true") || searchParams.get("create") === "true"
-                                );
+                                const isSubActive = pathname === sub.href;
 
                                 return (
                                   <li key={subIdx}>

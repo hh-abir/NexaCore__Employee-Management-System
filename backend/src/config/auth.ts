@@ -25,7 +25,7 @@ export const auth = betterAuth({
         type: "string",
         required: false,
         defaultValue: "EMPLOYEE",
-        input: false, // Disallow public inputs to the role field
+        input: false, 
       },
     },
   },

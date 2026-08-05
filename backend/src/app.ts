@@ -10,7 +10,7 @@ dotenv.config();
 
 const app = express();
 
-// CORS configuration to allow Next.js client requests with credentials
+
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -18,18 +18,18 @@ app.use(
   })
 );
 
-// Better Auth handler - mounted BEFORE body parsing middleware
+
 app.all("/api/auth/*path", toNodeHandler(auth));
 
-// Body parsing middleware for other routes
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Mount routes: aligns path to client endpoint demands
+
 app.use("/api/hr", hrRoutes);
 app.use("/api/projects", projectRoutes);
 
-// General status route
+
 app.get("/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date() });
 });

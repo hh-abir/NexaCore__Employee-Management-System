@@ -85,7 +85,7 @@ function LoginForm() {
           </div>
         )}
 
-        {/* Email Input */}
+        {}
         <div className="w-full">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">Email Address</label>
           <div className="flex items-center border border-slate-200 bg-slate-50 px-3 h-10 rounded-lg focus-within:bg-white focus-within:border-slate-950 transition-all">
@@ -104,7 +104,7 @@ function LoginForm() {
           </div>
         </div>
 
-        {/* Password Input */}
+        {}
         <div className="w-full">
           <div className="flex justify-between items-center mb-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-500 block">Password</label>
@@ -160,9 +160,9 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <div className="min-h-screen grid lg:grid-cols-12 bg-white font-sans antialiased">
-      {/* Left side: Form */}
+      {}
       <div className="lg:col-span-5 flex flex-col justify-between px-6 py-10 sm:px-12 lg:px-16 xl:px-20 relative">
-        {/* Brand Header */}
+        {}
         <div className="flex justify-between items-center">
           <Link href="/" className="flex items-center gap-2">
             <img src="/logo.jpg" alt="NexaCore" className="w-8.5 h-8.5 rounded-lg object-cover border border-slate-100" />
@@ -172,7 +172,7 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        {/* Center Form */}
+        {}
         <div className="my-auto py-12 flex justify-center lg:justify-start">
           <Suspense fallback={
             <div className="w-full max-w-sm text-center text-slate-500 py-8 text-xs font-semibold">
@@ -183,16 +183,16 @@ export default function LoginPage() {
           </Suspense>
         </div>
 
-        {/* Bottom copyright info */}
+        {}
         <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
           &copy; 2026 NexaCore Inc. All rights reserved.
         </div>
       </div>
 
-      {/* Right side: Branding Panel (Solid flat slate with clean metrics card) */}
+      {}
       <div className="hidden lg:col-span-7 lg:flex flex-col justify-between p-12 bg-zinc-950 text-white relative border-l border-slate-100/5 dark:border-zinc-800">
         
-        {/* Top Header Badge */}
+        {}
         <div className="relative flex justify-end">
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs font-bold text-white select-none shadow-xs">
             <ShieldCheck className="h-4 w-4 text-emerald-500" />
@@ -200,7 +200,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Branding Slogan & Graphics */}
+        {}
         <div className="relative max-w-lg space-y-10 my-auto">
           <div className="space-y-4">
             <h2 className="text-4xl xl:text-5xl font-extralight tracking-tight leading-tight">
@@ -211,7 +211,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Mini Dashboard Component inside Auth Page (Flat Slate) */}
+          {}
           <div className="p-5 bg-zinc-900/50 border border-zinc-800/80 rounded-xl space-y-4 select-none shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -245,7 +245,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Bottom Quote / Testimonial */}
+        {}
         <div className="relative text-xs text-slate-400 border-l border-slate-700 pl-4 py-1 italic max-w-md font-medium leading-relaxed">
           "NexaCore simplified our team management and cut payroll processing time by half."
           <span className="block mt-2 font-bold text-xs text-white not-italic">

@@ -9,7 +9,7 @@ export default function DashboardHeader() {
   const [isDark, setIsDark] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Sync initial theme status on mount
+  
   useEffect(() => {
     setMounted(true);
     if (typeof window !== "undefined") {
@@ -34,7 +34,7 @@ export default function DashboardHeader() {
   return (
     <header className="sticky top-0 z-40 w-full h-16 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white flex items-center justify-between px-8 select-none transition-colors duration-150 font-sans shadow-xs">
       
-      {/* Left: Sidebar Toggle & Minimal Search Bar */}
+      {}
       <div className="flex items-center space-x-4">
         <button 
           onClick={() => alert("Sidebar toggle triggered.")}
@@ -43,7 +43,7 @@ export default function DashboardHeader() {
           <Menu className="h-4.5 w-4.5" />
         </button>
 
-        {/* Subtle Search Input */}
+        {}
         <div className="relative flex items-center bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 w-64 focus-within:border-zinc-900 dark:focus-within:border-white transition-all shadow-xs">
           <Search className="h-3.5 w-3.5 text-slate-400 mr-2 shrink-0" />
           <input
@@ -54,10 +54,10 @@ export default function DashboardHeader() {
         </div>
       </div>
 
-      {/* Right: Unboxed Icons (Dark Mode, Bell, Mail, Avatar) */}
+      {}
       <div className="flex items-center space-x-5">
         
-        {/* Night Mode Toggle */}
+        {}
         <button
           onClick={toggleTheme}
           title={isDark ? "Switch to Light Mode" : "Switch to Night Mode"}
@@ -70,7 +70,7 @@ export default function DashboardHeader() {
           )}
         </button>
 
-        {/* Mail Envelope Icon */}
+        {}
         <button
           onClick={() => alert("Inbox: No unread messages.")}
           className="p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer rounded hover:bg-slate-50 dark:hover:bg-zinc-900"
@@ -78,7 +78,7 @@ export default function DashboardHeader() {
           <Mail className="h-4.5 w-4.5" />
         </button>
 
-        {/* Notifications with red dot badge */}
+        {}
         <button
           onClick={() => alert("Notification center: 3 pending task alerts.")}
           className="relative p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer rounded hover:bg-slate-50 dark:hover:bg-zinc-900"
@@ -87,7 +87,7 @@ export default function DashboardHeader() {
           <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-rose-500 rounded-full" />
         </button>
 
-        {/* User Mini Avatar */}
+        {}
         <div className="w-7.5 h-7.5 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-[10px] font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer flex items-center justify-center">
           {userInitials}
         </div>

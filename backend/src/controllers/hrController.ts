@@ -7,7 +7,7 @@ export const onboardEmployee = async (req: AuthenticatedRequest, res: Response) 
   try {
     const { name, email, role, password } = req.body;
 
-    // Check if employee email is already registered
+    
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
@@ -15,10 +15,10 @@ export const onboardEmployee = async (req: AuthenticatedRequest, res: Response) 
       return res.status(400).json({ error: "An employee with this email is already registered." });
     }
 
-    // Hash the starting credentials password
+    
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Save both User profile and Account mapping in a transaction
+    
     const newUser = await prisma.$transaction(async (tx) => {
       const u = await tx.user.create({
         data: {

@@ -9,7 +9,7 @@ export default function HrOnboardingPage() {
   const router = useRouter();
   const { data: sessionData, isPending: sessionLoading } = useSession();
 
-  // Form states
+  
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("EMPLOYEE");
@@ -18,18 +18,18 @@ export default function HrOnboardingPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Frontend Role Protection Redirects
+  
   useEffect(() => {
     if (!sessionLoading) {
       if (!sessionData) {
         router.push("/login");
       } else if (sessionData.user.role !== "HR") {
-        router.push("/"); // Redirect non-HR employees back to Home
+        router.push("/"); 
       }
     }
   }, [sessionData, sessionLoading, router]);
 
-  // Loading state during session check
+  
   if (sessionLoading || !sessionData || sessionData.user.role !== "HR") {
     return (
       <div className="flex-grow flex flex-col justify-center items-center bg-slate-50 dark:bg-zinc-950 font-sans min-h-screen">
@@ -60,7 +60,7 @@ export default function HrOnboardingPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ name, email, role, password }),
-        credentials: "include", // Ensure session cookies are sent with cross-origin request
+        credentials: "include", 
       });
 
       const data = await response.json();
