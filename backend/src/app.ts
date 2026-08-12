@@ -5,6 +5,8 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "./config/auth";
 import hrRoutes from "./routes/hrRoutes";
 import projectRoutes from "./routes/projectRoutes";
+import announcementRoutes from "./routes/announcementRoutes";
+import attendanceRoutes from "./routes/attendanceRoutes";
 
 dotenv.config();
 
@@ -28,6 +30,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/hr", hrRoutes);
 app.use("/api/projects", projectRoutes);
+app.use("/api/announcements", announcementRoutes);
+app.use("/api/attendance", attendanceRoutes);
 
 
 app.get("/health", (req, res) => {

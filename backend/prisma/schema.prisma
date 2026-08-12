@@ -35,6 +35,12 @@ model User {
   messages        Message[]
   assignedTasks   Task[]
 
+  // Announcement Relations
+  announcements   Announcement[] @relation("AnnouncementAuthor")
+
+  // Attendance Relations
+  attendance      Attendance[]
+
   @@map("user")
 }
 
@@ -162,4 +168,34 @@ model Task {
   assignee    User?     @relation(fields: [assigneeId], references: [id])
 
   @@map("task")
+}
+
+model Announcement {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Author relation
+  authorId  String   @db.ObjectId
+  author    User     @relation("AnnouncementAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("announcement")
+}
+
+model Attendance {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String    @db.ObjectId
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date         String    // e.g. "2026-08-12"
+  clockIn      DateTime
+  clockOut     DateTime?
+  hoursWorked  Float     @default(0.0)
+  isLate       Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([userId, date])
+  @@map("attendance")
 }

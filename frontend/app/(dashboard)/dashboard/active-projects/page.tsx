@@ -521,10 +521,10 @@ export default function ActiveProjectsPage() {
               <div className="py-12 text-center text-slate-400 text-xs font-bold">Synchronizing board...</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {["TO_DO", "IN_PROGRESS", "TESTING", "COMPLETED"].map(col => {
+                {["TODO", "IN_PROGRESS", "TESTING", "COMPLETED"].map(col => {
                   const colTasks = tasks.filter(t => t.column === col);
-                  const displayTitle = col === "TO_DO" ? "To Do" : col === "IN_PROGRESS" ? "In Progress" : col === "TESTING" ? "Testing" : "Completed";
-                  const headerBg = col === "TO_DO" ? "bg-slate-100/50 dark:bg-zinc-900" : col === "IN_PROGRESS" ? "bg-blue-500/10 text-blue-700 dark:text-blue-400" : col === "TESTING" ? "bg-amber-500/10 text-amber-700 dark:text-amber-400" : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400";
+                  const displayTitle = col === "TODO" ? "To Do" : col === "IN_PROGRESS" ? "In Progress" : col === "TESTING" ? "Testing" : "Completed";
+                  const headerBg = col === "TODO" ? "bg-slate-100/50 dark:bg-zinc-900" : col === "IN_PROGRESS" ? "bg-blue-500/10 text-blue-700 dark:text-blue-400" : col === "TESTING" ? "bg-amber-500/10 text-amber-700 dark:text-amber-400" : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400";
                   
                   return (
                     <div 
@@ -560,9 +560,9 @@ export default function ActiveProjectsPage() {
                             </div>
 
                             <div className="flex justify-end gap-1.5 pt-2 border-t border-slate-50/50 dark:border-zinc-900/40">
-                              {col !== "TO_DO" && (
+                              {col !== "TODO" && (
                                 <button 
-                                  onClick={() => handleMoveTask(task.id, "TO_DO")}
+                                  onClick={() => handleMoveTask(task.id, "TODO")}
                                   title="Move to To Do" 
                                   className="p-1 text-xs hover:bg-slate-50 dark:hover:bg-zinc-900 text-slate-500 rounded cursor-pointer"
                                 >
@@ -572,7 +572,7 @@ export default function ActiveProjectsPage() {
                               {col !== "COMPLETED" && (
                                 <button 
                                   onClick={() => {
-                                    const nextCol = col === "TO_DO" ? "IN_PROGRESS" : col === "IN_PROGRESS" ? "TESTING" : "COMPLETED";
+                                    const nextCol = col === "TODO" ? "IN_PROGRESS" : col === "IN_PROGRESS" ? "TESTING" : "COMPLETED";
                                     handleMoveTask(task.id, nextCol);
                                   }}
                                   title="Move Forward" 
