@@ -22,7 +22,9 @@ import {
   Calendar,
   DoorOpen,
   Vote,
-  Medal
+  Medal,
+  TrendingUp,
+  CreditCard
 } from "lucide-react";
 
 interface SidebarSubItem {
@@ -80,6 +82,7 @@ export default function DashboardSidebar() {
       title: "Dashboard",
       items: [
         { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+        { name: "Analytics", href: "/dashboard/analytics", icon: TrendingUp },
       ],
     },
     {
@@ -115,6 +118,7 @@ export default function DashboardSidebar() {
       items: [
         { name: "Payroll", href: "/dashboard/payroll", icon: DollarSign },
         { name: "Loans", href: "/dashboard/loans", icon: Wallet },
+        ...(isHr ? [{ name: "OpEx Ledger", href: "/dashboard/finance", icon: CreditCard }] : []),
       ],
     },
     {

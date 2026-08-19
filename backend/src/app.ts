@@ -18,6 +18,8 @@ import calendarRoutes from "./routes/calendarRoutes";
 import roomRoutes from "./routes/roomRoutes";
 import pollRoutes from "./routes/pollRoutes";
 import certificateRoutes from "./routes/certificateRoutes";
+import analyticsRoutes from "./routes/analyticsRoutes";
+import financeRoutes from "./routes/financeRoutes";
 
 dotenv.config();
 
@@ -54,6 +56,8 @@ app.use("/api/calendar", calendarRoutes);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/polls", pollRoutes);
 app.use("/api/certificates", certificateRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/finance", financeRoutes);
 
 
 app.get("/health", (req, res) => {

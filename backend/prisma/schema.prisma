@@ -81,6 +81,9 @@ model User {
   certificatesReceived  Certificate[] @relation("RecipientCertificates")
   certificatesIssued    Certificate[] @relation("IssuedCertificates")
 
+  // Finance Relations
+  financeExpenses       FinanceExpense[] @relation("UserFinanceExpenses")
+
   @@map("user")
 }
 
@@ -566,6 +569,57 @@ model Certificate {
 
   @@map("certificate")
 }
+
+enum ExpenseCategory {
+  CLOUD_INFRASTRUCTURE
+  SAAS_SUBSCRIPTIONS
+  HARDWARE_EQUIPMENT
+  OFFICE_OPERATIONS
+  TEAM_EVENTS
+  LEGAL_COMPLIANCE
+  MARKETING_ADVERTISING
+  OTHER
+}
+
+enum ExpenseStatus {
+  APPROVED
+  PENDING
+  REIMBURSED
+}
+
+model FinanceExpense {
+  id           String          @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  amount       Float
+  category     ExpenseCategory @default(CLOUD_INFRASTRUCTURE)
+  vendor       String?
+  invoiceRef   String?
+  status       ExpenseStatus   @default(APPROVED)
+  date         String          // YYYY-MM-DD
+  notes        String?
+  
+  // Recorded by
+  recordedById String          @db.ObjectId
+  recordedBy   User            @relation("UserFinanceExpenses", fields: [recordedById], references: [id], onDelete: Cascade)
+  
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@map("finance_expense")
+}
+
+model FinanceBudget {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  fiscalYear  Int      @default(2026)
+  quarter     String   @default("Q3") // Q1, Q2, Q3, Q4
+  allocated   Float    @default(250000.0)
+  reserveFund Float    @default(50000.0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("finance_budget")
+}
+
 
 
 
