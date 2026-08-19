@@ -7,6 +7,17 @@ import hrRoutes from "./routes/hrRoutes";
 import projectRoutes from "./routes/projectRoutes";
 import announcementRoutes from "./routes/announcementRoutes";
 import attendanceRoutes from "./routes/attendanceRoutes";
+import leaveRoutes from "./routes/leaveRoutes";
+import payrollRoutes from "./routes/payrollRoutes";
+import loanRoutes from "./routes/loanRoutes";
+import evaluationRoutes from "./routes/evaluationRoutes";
+import userRoutes from "./routes/userRoutes";
+import notificationRoutes from "./routes/notificationRoutes";
+import grievanceRoutes from "./routes/grievanceRoutes";
+import calendarRoutes from "./routes/calendarRoutes";
+import roomRoutes from "./routes/roomRoutes";
+import pollRoutes from "./routes/pollRoutes";
+import certificateRoutes from "./routes/certificateRoutes";
 
 dotenv.config();
 
@@ -32,6 +43,17 @@ app.use("/api/hr", hrRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/announcements", announcementRoutes);
 app.use("/api/attendance", attendanceRoutes);
+app.use("/api/leaves", leaveRoutes);
+app.use("/api/payroll", payrollRoutes);
+app.use("/api/loans", loanRoutes);
+app.use("/api/evaluations", evaluationRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/grievances", grievanceRoutes);
+app.use("/api/calendar", calendarRoutes);
+app.use("/api/rooms", roomRoutes);
+app.use("/api/polls", pollRoutes);
+app.use("/api/certificates", certificateRoutes);
 
 
 app.get("/health", (req, res) => {

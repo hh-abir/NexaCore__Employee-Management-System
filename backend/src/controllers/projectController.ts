@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { prisma } from "../config/db";
 import { AuthenticatedRequest } from "../middlewares/roleGuard";
+import { createNotification, createRoleNotification } from "../utils/notificationService";
 
 
 
@@ -91,6 +92,26 @@ export const createProject = async (req: AuthenticatedRequest, res: Response) =>
         employees: { select: { id: true, name: true, email: true } }
       }
     });
+
+    // 1. Notify Assigned Project Manager
+    await createNotification(
+      managerId,
+      "New Project Assigned: Approval Required",
+      `HR assigned you as Project Manager for "${project.name}". Please review and approve to activate the workspace.`,
+      "PROJECT",
+      "/dashboard/active-projects"
+    );
+
+    // 2. Notify Assigned Team Members
+    for (const empId of assignedIds) {
+      await createNotification(
+        empId,
+        "Allocated to New Project",
+        `You have been allocated to the project "${project.name}". It is currently awaiting Project Manager activation.`,
+        "PROJECT",
+        "/dashboard/active-projects"
+      );
+    }
 
     return res.status(201).json({ message: "Project created successfully.", project });
   } catch (error: any) {
@@ -233,6 +254,26 @@ export const approveProject = async (req: AuthenticatedRequest, res: Response) =
       }
     });
 
+    // Notify HR
+    await createRoleNotification(
+      ["HR"],
+      "Project Workspace Activated",
+      `Project Manager ${req.user!.name} approved and activated "${updatedProject.name}".`,
+      "PROJECT",
+      "/dashboard/active-projects"
+    );
+
+    // Notify Team Members
+    for (const empId of updatedProject.employeeIds) {
+      await createNotification(
+        empId,
+        "Project Workspace is Now Live",
+        `Project "${updatedProject.name}" has been activated. You can now collaborate on tasks and project channels.`,
+        "PROJECT",
+        "/dashboard/active-projects"
+      );
+    }
+
     return res.status(200).json({ message: "Project approved successfully.", project: updatedProject });
   } catch (error: any) {
     console.error("[approveProject Error]:", error);
@@ -304,11 +345,11 @@ export const updateTask = async (req: AuthenticatedRequest, res: Response) => {
     const updatedTask = await prisma.task.update({
       where: { id: taskId },
       data: {
-        title,
-        description,
-        column,
-        assigneeId: assigneeId !== undefined ? assigneeId : undefined,
-        dueDate: dueDate ? new Date(dueDate) : undefined
+        title: title !== undefined ? title : undefined,
+        description: description !== undefined ? description : undefined,
+        column: column !== undefined ? column : undefined,
+        assigneeId: assigneeId !== undefined ? (assigneeId ? assigneeId : null) : undefined,
+        dueDate: dueDate !== undefined ? (dueDate ? new Date(dueDate) : null) : undefined
       },
       include: {
         assignee: { select: { id: true, name: true, email: true } }
@@ -406,3 +447,223 @@ export const postChannelMessage = async (req: AuthenticatedRequest, res: Respons
     return res.status(500).json({ error: "Failed to send message." });
   }
 };
+
+// PM or HR marks project as completed / requests budget settlement
+export const requestProjectCompletion = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const projectId = req.params.projectId as string;
+    const userId = req.user!.id;
+    const userRole = req.user!.role;
+
+    const project = await prisma.project.findUnique({
+      where: { id: projectId },
+      include: {
+        manager: { select: { id: true, name: true, email: true } },
+        employees: { select: { id: true, name: true, email: true } }
+      }
+    });
+
+    if (!project) {
+      return res.status(404).json({ error: "Project not found." });
+    }
+
+    if (userRole !== "HR" && project.managerId !== userId) {
+      return res.status(403).json({ error: "Forbidden: Only the assigned Project Manager or HR can request completion." });
+    }
+
+    if (project.status === "COMPLETED") {
+      return res.status(400).json({ error: "Project is already completed and settled." });
+    }
+
+    const updated = await prisma.project.update({
+      where: { id: projectId },
+      data: { status: "PENDING_SETTLEMENT" },
+      include: {
+        manager: { select: { id: true, name: true, email: true } },
+        employees: { select: { id: true, name: true, email: true } }
+      }
+    });
+
+    // Notify HR of completion & pending settlement
+    await createRoleNotification(
+      ["HR"],
+      "Project Completion & Settlement Requested",
+      `Project Manager ${project.manager.name} marked "${project.name}" as completed. Budget of $${project.budget.toLocaleString()} is pending HR review & payout transfer.`,
+      "PROJECT",
+      "/dashboard"
+    );
+
+    return res.status(200).json({ message: "Project completion requested. Awaiting HR settlement.", project: updated });
+  } catch (error: any) {
+    console.error("[requestProjectCompletion Error]:", error);
+    return res.status(500).json({ error: "Failed to request project completion." });
+  }
+};
+
+// HR approves project completion and transfers/disburses project budget / bonus
+export const settleProjectPayout = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const projectId = req.params.projectId as string;
+    const { bonusPercentage, bonusAmountPerMember } = req.body;
+
+    if (req.user!.role !== "HR") {
+      return res.status(403).json({ error: "Forbidden: Only HR administrators can settle project payouts." });
+    }
+
+    const project = await prisma.project.findUnique({
+      where: { id: projectId },
+      include: {
+        manager: { select: { id: true, name: true, email: true } },
+        employees: { select: { id: true, name: true, email: true } }
+      }
+    });
+
+    if (!project) {
+      return res.status(404).json({ error: "Project not found." });
+    }
+
+    if (project.payoutApproved && project.status === "COMPLETED") {
+      return res.status(400).json({ error: "Project budget has already been settled and disbursed." });
+    }
+
+    const teamSize = project.employees.length || 1;
+    let bonusPerMember = 0;
+
+    if (bonusAmountPerMember !== undefined && !isNaN(parseFloat(bonusAmountPerMember))) {
+      bonusPerMember = parseFloat(bonusAmountPerMember);
+    } else if (bonusPercentage !== undefined && !isNaN(parseFloat(bonusPercentage))) {
+      const totalBonusPool = (project.budget * parseFloat(bonusPercentage)) / 100;
+      bonusPerMember = totalBonusPool / teamSize;
+    }
+
+    // Update project
+    const updated = await prisma.project.update({
+      where: { id: projectId },
+      data: {
+        status: "COMPLETED",
+        payoutApproved: true,
+        payoutBonus: bonusPerMember
+      },
+      include: {
+        manager: { select: { id: true, name: true, email: true } },
+        employees: { select: { id: true, name: true, email: true } }
+      }
+    });
+
+    // Notify Project Manager
+    await createNotification(
+      project.managerId,
+      "Project Completion & Budget Settled",
+      `HR has approved completion and transferred budget for "${project.name}" ($${project.budget.toLocaleString()}).`,
+      "PROJECT",
+      "/dashboard/active-projects"
+    );
+
+    // Auto-generate official digital certificate for PM and all team members
+    const allParticipants = [project.manager, ...project.employees].filter(Boolean);
+    for (const participant of allParticipants) {
+      const timestamp = Date.now().toString(36).toUpperCase();
+      const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+      const code = `NEXA-PROJ-${timestamp}-${rand}`;
+
+      await prisma.certificate.create({
+        data: {
+          certificateCode: code,
+          title: `Project Completion: ${project.name}`,
+          type: "PROJECT_COMPLETION",
+          description: `Awarded for successful engineering milestone delivery and deployment of ${project.name} (${project.category || "Software Development"}).`,
+          recipientId: participant.id,
+          projectId: project.id,
+          issuerId: req.user!.id,
+          pmSignature: project.manager?.name || "Project Lead",
+          hrSignature: "NexaCore Board of Directors"
+        }
+      }).catch(err => console.warn("Failed to auto-issue certificate:", err));
+    }
+
+    return res.status(200).json({ 
+      message: "Project budget payout and completion approved successfully. Digital certificates issued.", 
+      project: updated,
+      bonusPerMember
+    });
+  } catch (error: any) {
+    console.error("[settleProjectPayout Error]:", error);
+    return res.status(500).json({ error: "Failed to settle project payout." });
+  }
+};
+
+// Project Manager Dashboard Summary API
+export const getPMSummary = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const pmId = req.user!.id;
+    if (req.user!.role !== "PROJECT_MANAGER" && req.user!.role !== "HR") {
+      return res.status(403).json({ error: "Forbidden: Only Project Managers or HR can access the PM dashboard." });
+    }
+
+    const projects = await prisma.project.findMany({
+      where: req.user!.role === "PROJECT_MANAGER" ? { managerId: pmId } : {},
+      include: {
+        employees: { select: { id: true, name: true, email: true } },
+        manager: { select: { id: true, name: true, email: true } },
+        tasks: true,
+        channels: true
+      },
+      orderBy: { createdAt: "desc" }
+    });
+
+    const activeProjects = projects.filter(p => p.status === "ACTIVE");
+    const pendingProjects = projects.filter(p => p.status === "PENDING");
+    const completedProjects = projects.filter(p => p.status === "COMPLETED");
+
+    // All distinct team members
+    const teamMemberMap = new Map();
+    projects.forEach(p => {
+      p.employees.forEach(e => {
+        teamMemberMap.set(e.id, e);
+      });
+    });
+    const teamMemberIds = Array.from(teamMemberMap.keys());
+
+    // Aggregate tasks
+    const allTasks = projects.flatMap(p => p.tasks);
+    const todoTasks = allTasks.filter(t => t.column === "TODO").length;
+    const inProgressTasks = allTasks.filter(t => t.column === "IN_PROGRESS").length;
+    const testingTasks = allTasks.filter(t => t.column === "TESTING").length;
+    const completedTasks = allTasks.filter(t => t.column === "COMPLETED").length;
+
+    // Team pending leave requests
+    const pendingTeamLeaves = await prisma.leaveRequest.findMany({
+      where: {
+        userId: { in: teamMemberIds },
+        status: "PENDING"
+      },
+      include: {
+        user: { select: { id: true, name: true, email: true } }
+      },
+      orderBy: { createdAt: "desc" }
+    });
+
+    return res.status(200).json({
+      metrics: {
+        totalProjects: projects.length,
+        activeProjectsCount: activeProjects.length,
+        pendingProjectsCount: pendingProjects.length,
+        completedProjectsCount: completedProjects.length,
+        teamMembersCount: teamMemberMap.size,
+        totalTasksCount: allTasks.length,
+        todoTasks,
+        inProgressTasks,
+        testingTasks,
+        completedTasks,
+        pendingTeamLeavesCount: pendingTeamLeaves.length
+      },
+      projects,
+      pendingProjects,
+      pendingTeamLeaves
+    });
+  } catch (error) {
+    console.error("[getPMSummary Error]:", error);
+    return res.status(500).json({ error: "Failed to load PM dashboard metrics." });
+  }
+};
+

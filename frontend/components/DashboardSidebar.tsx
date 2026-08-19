@@ -16,7 +16,13 @@ import {
   LogOut,
   ChevronRight,
   ChevronDown,
-  Briefcase
+  Briefcase,
+  Award,
+  ShieldAlert,
+  Calendar,
+  DoorOpen,
+  Vote,
+  Medal
 } from "lucide-react";
 
 interface SidebarSubItem {
@@ -55,10 +61,8 @@ export default function DashboardSidebar() {
     router.push("/login");
   };
 
-  const isHrOrPm = sessionData?.user?.role === "HR" || sessionData?.user?.role === "PROJECT_MANAGER";
   const isHr = sessionData?.user?.role === "HR";
 
-  
   const userInitials = mounted && sessionData?.user?.name
     ? sessionData.user.name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase()
     : "JD";
@@ -86,25 +90,31 @@ export default function DashboardSidebar() {
           href: "#",
           icon: Briefcase,
           subItems: [
-            { name: "Active Projects", href: "/dashboard/active-projects" },
-            ...(isHr ? [{ name: "Add Project", href: "/dashboard/create-project" }] : [])
+            { name: "Active", href: "/dashboard/active-projects" },
+            ...(isHr ? [{ name: "Create", href: "/dashboard/create-project" }] : [])
           ]
         }
       ]
     },
     {
-      title: "Apps",
+      title: "Operations",
       items: [
-        { name: "Employee Onboarding", href: "/hr/onboarding", icon: UserPlus },
-        { name: "Leave Requests", href: "/dashboard/leaves", icon: FileText },
-        { name: "Attendance Logs", href: "/dashboard/attendance", icon: Clock },
+        ...(isHr ? [{ name: "Onboarding", href: "/hr/onboarding", icon: UserPlus }] : []),
+        { name: "Leaves", href: "/dashboard/leaves", icon: FileText },
+        { name: "Calendar", href: "/dashboard/calendar", icon: Calendar },
+        { name: "Rooms", href: "/dashboard/rooms", icon: DoorOpen },
+        { name: "Polls", href: "/dashboard/polls", icon: Vote },
+        { name: "Attendance", href: "/dashboard/attendance", icon: Clock },
+        { name: "Reviews", href: "/dashboard/evaluations", icon: Award },
+        { name: "Certificates", href: "/dashboard/certificates", icon: Medal },
+        { name: "Grievances", href: "/dashboard/grievances", icon: ShieldAlert },
       ],
     },
     {
       title: "Finance",
       items: [
-        { name: "Payroll Ledger", href: "/dashboard/payroll", icon: DollarSign },
-        { name: "Loans Tracker", href: "/dashboard/loans", icon: Wallet },
+        { name: "Payroll", href: "/dashboard/payroll", icon: DollarSign },
+        { name: "Loans", href: "/dashboard/loans", icon: Wallet },
       ],
     },
     {
@@ -115,10 +125,8 @@ export default function DashboardSidebar() {
     },
   ];
 
-  
   useEffect(() => {
     const nextExpanded: Record<string, boolean> = {};
-    const tabVal = searchParams.get("tab");
     
     menuGroups.forEach(group => {
       group.items.forEach(item => {
@@ -134,7 +142,7 @@ export default function DashboardSidebar() {
       });
     });
     setExpandedItems(prev => ({ ...prev, ...nextExpanded }));
-  }, [pathname, searchParams]);
+  }, [pathname, isHr]);
 
   const toggleExpand = (name: string) => {
     setExpandedItems(prev => ({
@@ -144,21 +152,21 @@ export default function DashboardSidebar() {
   };
 
   return (
-    <aside className="w-64 h-screen fixed left-0 top-0 flex flex-col justify-between bg-white dark:bg-zinc-950 text-slate-900 dark:text-white transition-colors duration-150 select-none border-r border-slate-50 dark:border-zinc-900/50 font-sans z-30">
+    <aside className="w-64 h-screen fixed left-0 top-0 flex flex-col justify-between bg-white dark:bg-zinc-950 text-slate-900 dark:text-white transition-colors duration-150 select-none border-r border-slate-50 dark:border-zinc-900/50 font-sans z-30 overflow-x-hidden">
       
-      {}
-      <div className="flex flex-col flex-grow min-h-0">
+      {/* Top Container */}
+      <div className="flex flex-col flex-grow min-h-0 overflow-hidden">
         
-        {}
-        <div className="h-16 px-6 flex items-center gap-2.5">
+        {/* Brand Header */}
+        <div className="h-16 px-6 flex items-center gap-2.5 shrink-0">
           <img src="/logo.jpg" alt="NexaCore" className="w-8 h-8 rounded-lg object-cover border border-slate-100 dark:border-zinc-800" />
           <span className="text-sm font-bold tracking-tight text-zinc-900 dark:text-white">
             NexaCore<span className="text-zinc-400">.</span>
           </span>
         </div>
 
-        {}
-        <div className="flex-grow overflow-y-auto px-4 py-4 space-y-5">
+        {/* Navigation Stream: Large Spacious Rows, Short & Precise Labels, No Horizontal Overflow */}
+        <div className="flex-grow overflow-y-auto overflow-x-hidden px-4 py-4 space-y-5">
           {menuGroups.map((group, groupIdx) => (
             <div key={groupIdx} className="space-y-1.5">
               <span className="px-3 text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
@@ -170,16 +178,7 @@ export default function DashboardSidebar() {
                   const hasSub = item.subItems && item.subItems.length > 0;
                   const isExpanded = expandedItems[item.name] || false;
                   
-                  const tabVal = searchParams.get("tab");
-                  const isAnySubActive = hasSub && item.subItems!.some(sub => {
-                    const basePath = sub.href.split("?")[0];
-                    const isBaseMatch = pathname === basePath;
-                    if (sub.href.includes("tab=Projects")) {
-                      return isBaseMatch && tabVal === "Projects";
-                    }
-                    return isBaseMatch;
-                  });
-
+                  const isAnySubActive = hasSub && item.subItems!.some(sub => pathname === sub.href);
                   const isActive = (!hasSub && pathname === item.href) || isAnySubActive;
 
                   return (
@@ -187,11 +186,12 @@ export default function DashboardSidebar() {
                       {hasSub ? (
                         <>
                           <button
+                            type="button"
                             onClick={() => toggleExpand(item.name)}
-                            className={`w-full flex items-center justify-between py-3 px-4 text-sm font-semibold rounded-xl transition-all duration-200 cursor-pointer ${
+                            className={`w-full flex items-center justify-between py-3 px-4 text-sm font-semibold rounded-xl transition-all duration-150 cursor-pointer ${
                               isActive
                                 ? "bg-slate-100/80 text-zinc-950 dark:bg-zinc-900 dark:text-white"
-                                : "bg-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-zinc-900/50 hover:translate-x-0.5"
+                                : "bg-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-zinc-900/50"
                             }`}
                           >
                             <div className="flex items-center gap-3.5 min-w-0">
@@ -217,7 +217,7 @@ export default function DashboardSidebar() {
 
                           {/* Sub menu links list */}
                           {isExpanded && (
-                            <ul className="pl-5.5 space-y-0.5 border-l border-slate-100 dark:border-zinc-900 ml-6 mt-1 text-left">
+                            <ul className="pl-4 space-y-0.5 border-l border-slate-100 dark:border-zinc-900 ml-5 mt-1 text-left">
                               {item.subItems!.map((sub, subIdx) => {
                                 const isSubActive = pathname === sub.href;
 
@@ -225,10 +225,10 @@ export default function DashboardSidebar() {
                                   <li key={subIdx}>
                                     <Link
                                       href={sub.href}
-                                      className={`w-full flex items-center py-2 px-4 text-xs font-semibold rounded-lg transition-all duration-150 ${
+                                      className={`w-full flex items-center py-2 px-3.5 text-xs font-semibold rounded-lg transition-all duration-150 truncate ${
                                         isSubActive
                                           ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 font-bold shadow-xs"
-                                          : "bg-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/10 dark:hover:bg-zinc-900/40"
+                                          : "bg-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-zinc-900/50"
                                       }`}
                                     >
                                       {sub.name}
@@ -242,10 +242,10 @@ export default function DashboardSidebar() {
                       ) : (
                         <Link
                           href={item.href}
-                          className={`w-full flex items-center justify-between py-3 px-4 text-sm font-semibold rounded-xl transition-all duration-200 ${
+                          className={`w-full flex items-center justify-between py-3 px-4 text-sm font-semibold rounded-xl transition-all duration-150 ${
                             isActive
                               ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 shadow-xs font-bold"
-                              : "bg-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-zinc-900/50 hover:translate-x-0.5"
+                              : "bg-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-zinc-900/50"
                           }`}
                         >
                           <div className="flex items-center gap-3.5 min-w-0">
@@ -276,8 +276,7 @@ export default function DashboardSidebar() {
       </div>
 
       {/* Bottom Pinned User Profile Segment */}
-      <div className="p-4">
-        {/* User profile segment */}
+      <div className="p-4 shrink-0">
         <div className="flex items-center justify-between gap-2.5 px-1 pt-1">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-full font-bold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs shrink-0 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center">
@@ -301,6 +300,7 @@ export default function DashboardSidebar() {
           </button>
         </div>
       </div>
+
     </aside>
   );
 }

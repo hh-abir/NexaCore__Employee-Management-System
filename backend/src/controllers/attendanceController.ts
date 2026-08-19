@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { prisma } from "../config/db";
 import { AuthenticatedRequest } from "../middlewares/roleGuard";
+import { createNotification } from "../utils/notificationService";
 
 // Coordinates for BRAC University campus (Merul Badda, Dhaka)
 const BRAC_LAT = 23.7725;
@@ -74,6 +75,15 @@ export const clockIn = async (req: AuthenticatedRequest, res: Response) => {
         isLate
       }
     });
+
+    // Notify employee of verified check-in
+    await createNotification(
+      req.user!.id,
+      "Attendance Verified",
+      `Clock-in confirmed at ${now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} ${isLate ? "(Late check-in recorded)" : "(On-time)"}. Geofence verified at BRAC University.`,
+      "ATTENDANCE",
+      "/dashboard/attendance"
+    );
 
     return res.status(201).json({ message: "Successfully clocked in.", attendance: log });
   } catch (err) {
@@ -167,14 +177,47 @@ export const getAttendanceStatus = async (req: AuthenticatedRequest, res: Respon
 
 export const getAttendanceHistory = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const history = await prisma.attendance.findMany({
-      where: {
-        userId: req.user!.id
-      },
-      orderBy: {
-        clockIn: "desc"
-      }
-    });
+    const userRole = req.user!.role;
+    let history;
+
+    if (userRole === "HR") {
+      // HR sees all employees' attendance records across the entire company
+      history = await prisma.attendance.findMany({
+        orderBy: {
+          clockIn: "desc"
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true
+            }
+          }
+        }
+      });
+    } else {
+      // Employees and PMs see their own check-ins
+      history = await prisma.attendance.findMany({
+        where: {
+          userId: req.user!.id
+        },
+        orderBy: {
+          clockIn: "desc"
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true
+            }
+          }
+        }
+      });
+    }
 
     return res.status(200).json({ history });
   } catch (err) {

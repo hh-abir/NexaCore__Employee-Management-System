@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { prisma } from "../config/db";
 import { AuthenticatedRequest } from "../middlewares/roleGuard";
+import { createGlobalNotification } from "../utils/notificationService";
 
 export const createAnnouncement = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -34,6 +35,14 @@ export const createAnnouncement = async (req: AuthenticatedRequest, res: Respons
         }
       }
     });
+
+    // Broadcast notification to all employees
+    await createGlobalNotification(
+      `New Notice: ${announcement.title}`,
+      announcement.content.length > 120 ? announcement.content.slice(0, 117) + "..." : announcement.content,
+      "ANNOUNCEMENT",
+      "/dashboard"
+    );
 
     return res.status(201).json({ announcement });
   } catch (err) {
