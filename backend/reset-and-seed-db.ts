@@ -81,8 +81,9 @@ async function main() {
     { name: "Zeeshan Alam", email: "zeeshan.alam@nexacore.com", designation: "Platform Operations Manager", dept: "Infrastructure" }
   ];
 
-  const createdManagers: any[] = [];
-  for (const mgr of managersData) {
+  const createdManagers: { id: string; name: string; email: string }[] = [];
+  for (let i = 0; i < managersData.length; i++) {
+    const mgr = managersData[i];
     const user = await prisma.user.create({
       data: {
         name: mgr.name,
@@ -91,7 +92,7 @@ async function main() {
         role: "PROJECT_MANAGER",
         department: mgr.dept,
         designation: mgr.designation,
-        phone: "+880 1811-00000" + (createdManagers.length + 1)
+        phone: "+880 1811-00000" + (i + 1)
       }
     });
 
@@ -103,7 +104,7 @@ async function main() {
         password: hashedPassword
       }
     });
-    createdManagers.push(user);
+    createdManagers.push({ id: user.id, name: user.name, email: user.email });
     console.log(`✔ PM: ${user.name} (${user.email})`);
   }
 
@@ -134,8 +135,9 @@ async function main() {
     { name: "Sumaiya Rahman", email: "sumaiya.rahman@nexacore.com", designation: "Growth & Marketing Lead", dept: "Marketing", salary: 4500 }
   ];
 
-  const createdEmployees: any[] = [];
-  for (const emp of employeesData) {
+  const createdEmployees: { id: string; name: string; email: string }[] = [];
+  for (let i = 0; i < employeesData.length; i++) {
+    const emp = employeesData[i];
     const user = await prisma.user.create({
       data: {
         name: emp.name,
@@ -144,7 +146,7 @@ async function main() {
         role: "EMPLOYEE",
         department: emp.dept,
         designation: emp.designation,
-        phone: "+880 1911-0000" + (createdEmployees.length + 1)
+        phone: "+880 1911-0000" + (i + 1)
       }
     });
 
@@ -171,7 +173,7 @@ async function main() {
       }
     });
 
-    createdEmployees.push(user);
+    createdEmployees.push({ id: user.id, name: user.name, email: user.email });
     console.log(`✔ Dev: ${user.name} (${user.email}) - Base: $${emp.salary}`);
   }
 
