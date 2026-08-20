@@ -12,6 +12,8 @@ const trustedOrigins = [
 ].filter(Boolean) as string[];
 
 export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:5000",
+  secret: process.env.BETTER_AUTH_SECRET || "nexacore_enterprise_secret_key_987654321_jwt_auth",
   database: prismaAdapter(prisma, {
     provider: "mongodb",
   }),
@@ -42,6 +44,10 @@ export const auth = betterAuth({
       generateId: false,
     },
     useSecureCookies: process.env.NODE_ENV === "production",
+    defaultCookieAttributes: {
+      sameSite: "none",
+      secure: true,
+    },
     ipAddress: {
       ipAddressHeaders: ["x-forwarded-for", "x-real-ip", "cf-connecting-ip"],
     },
