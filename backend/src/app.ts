@@ -28,6 +28,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:3000",
+  "https://nexa-core-ems.vercel.app",
   process.env.FRONTEND_URL,
   process.env.NEXT_PUBLIC_APP_URL,
 ].filter(Boolean) as string[];

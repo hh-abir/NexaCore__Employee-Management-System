@@ -22,10 +22,12 @@ export const roleGuard = (allowedRoles: ("HR" | "PROJECT_MANAGER" | "EMPLOYEE")[
         return res.status(401).json({ error: "Unauthorized: Invalid or missing session." });
       }
 
-      const { user } = sessionData;
-      if (!allowedRoles.includes(user.role as any)) {
+      const user = sessionData.user as any;
+      const userRole = user.role || "EMPLOYEE";
+
+      if (!allowedRoles.includes(userRole as any)) {
         return res.status(403).json({ 
-          error: `Forbidden: This resource is restricted to roles: [${allowedRoles.join(", ")}]. Current role: ${user.role}` 
+          error: `Forbidden: This resource is restricted to roles: [${allowedRoles.join(", ")}]. Current role: ${userRole}` 
         });
       }
 
@@ -34,7 +36,7 @@ export const roleGuard = (allowedRoles: ("HR" | "PROJECT_MANAGER" | "EMPLOYEE")[
         id: user.id,
         name: user.name || "",
         email: user.email,
-        role: user.role || "EMPLOYEE",
+        role: userRole,
       };
 
       next();
