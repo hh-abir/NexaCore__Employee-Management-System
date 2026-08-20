@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
 import {
   Shield,
   Calendar,
@@ -26,12 +25,27 @@ import {
   ArrowUpRight,
   Plus,
   HelpCircle,
-  Check
+  Check,
+  Medal,
+  CreditCard,
+  Building,
+  Vote,
+  DoorOpen,
+  ShieldCheck,
+  FileText,
+  Search,
+  Lock,
+  ChevronDown,
+  MapPin
 } from "lucide-react";
 
 export default function Home() {
   const [darkMode, setDarkMode] = useState(false);
   const [activeTab, setActiveTab] = useState<"HR" | "PM" | "EMPLOYEE">("HR");
+  const [featureCategory, setFeatureCategory] = useState<string>("ALL");
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [simCertCode, setSimCertCode] = useState("NEXA-CERT-2026-8812");
+  const [certVerified, setCertVerified] = useState(false);
 
   useEffect(() => {
     if (darkMode) {
@@ -41,86 +55,223 @@ export default function Home() {
     }
   }, [darkMode]);
 
-  const features = [
+  const allModules = [
     {
-      title: "Role-Based Access Control",
-      description: "Enforce company security with designated HR, PM, and Employee permissions and routes.",
+      id: 1,
+      category: "OPERATIONS",
+      title: "Account Security & 2FA Suite",
+      description: "Profile customization, password management, session monitoring, and 2FA authentication controls.",
       icon: Shield,
       tag: "Security"
     },
     {
-      title: "Absence & Leave Workflows",
-      description: "Submit leave requests with date ranges and categories. Handles PM and HR approval queues.",
+      id: 2,
+      category: "OPERATIONS",
+      title: "Role-Based Access Control",
+      description: "Strict RBAC security across HR, Project Manager, and Software Engineer roles via Better-Auth sessions.",
+      icon: Lock,
+      tag: "RBAC"
+    },
+    {
+      id: 3,
+      category: "OPERATIONS",
+      title: "Employee Onboarding Hub",
+      description: "Fast-track staff provisioning, department allocation, designation hierarchy, and base compensation setup.",
+      icon: Users,
+      tag: "HR Suite"
+    },
+    {
+      id: 4,
+      category: "ATTENDANCE",
+      title: "Leave Management Ledger",
+      description: "Vacation, sick, and emergency leave requests with automated multi-tier approval queues.",
       icon: Calendar,
-      tag: "Operations"
+      tag: "Leave"
     },
     {
-      title: "Kanban Task Boards",
-      description: "Create and track project tickets. Drag cards across stages and assign task owners.",
-      icon: Layers,
-      tag: "Collaboration"
+      id: 5,
+      category: "ATTENDANCE",
+      title: "Remote Work (WFH) Planner",
+      description: "Single-day and recurring work-from-home tracking with live company calendar synchronization.",
+      icon: Building,
+      tag: "Remote"
     },
     {
-      title: "Automated Salary Slips",
-      description: "Generate monthly payslips based on base salary, check-in logs, and deduction formulas.",
+      id: 6,
+      category: "ATTENDANCE",
+      title: "Geofenced Check-In Radar",
+      description: "200m Haversine radius validation at BRAC University campus with precision punctuality logs.",
+      icon: MapPin,
+      tag: "Geofencing"
+    },
+    {
+      id: 7,
+      category: "FINANCE",
+      title: "Payroll & Payslip PDF Engine",
+      description: "Monthly compensation calculations, milestone bonus payouts, deductions, and print-ready A4 slips.",
       icon: DollarSign,
-      tag: "Finance"
+      tag: "Payroll"
     },
     {
-      title: "Project Chat Channels",
-      description: "Collaborate via real-time WebSocket messaging restricted to assigned project team members.",
+      id: 8,
+      category: "FINANCE",
+      title: "Company Loan Assistance",
+      description: "Emergency loan applications, monthly installment calculators, and HR approval governance.",
+      icon: CreditCard,
+      tag: "Relief"
+    },
+    {
+      id: 9,
+      category: "OPERATIONS",
+      title: "360° Performance Appraisals",
+      description: "Quarterly review scorecards (1 to 5 rating), structured manager feedback, and rating analytics.",
+      icon: TrendingUp,
+      tag: "Reviews"
+    },
+    {
+      id: 10,
+      category: "OPERATIONS",
+      title: "Confidential Grievance Portal",
+      description: "Anonymous incident reporting, urgency classification, and HR resolution documentation.",
+      icon: ShieldCheck,
+      tag: "Compliance"
+    },
+    {
+      id: 11,
+      category: "SPRINTS",
+      title: "Project Workspace & Budgeting",
+      description: "Multi-category project initialization, budget allocations, and automated PM activation alerts.",
+      icon: Briefcase,
+      tag: "Projects"
+    },
+    {
+      id: 12,
+      category: "SPRINTS",
+      title: "Markdown Sprint Kanban Board",
+      description: "Drag-and-drop task pipeline, rich Markdown specifications, and right-side interactive task drawer.",
+      icon: Layers,
+      tag: "Kanban"
+    },
+    {
+      id: 13,
+      category: "SPRINTS",
+      title: "Slack-Style Project Channels",
+      description: "Real-time communication channels (#general, #announcements, #technical) with persistent chat streams.",
       icon: MessageSquare,
       tag: "Chat"
     },
     {
-      title: "Performance Appraisals",
-      description: "Track workforce performance reviews, dynamic ratings, and historical timelines.",
-      icon: TrendingUp,
-      tag: "Compliance"
+      id: 14,
+      category: "OPERATIONS",
+      title: "Meeting Room Reservations",
+      description: "Corporate suites catalog with single-booking concurrency limits and calendar hooks.",
+      icon: DoorOpen,
+      tag: "Facilities"
     },
+    {
+      id: 15,
+      category: "OPERATIONS",
+      title: "Personalized Company Calendar",
+      description: "Unified view of Holidays, Project Deadlines, Task Due Dates, Leaves/WFH, and Room Meetings.",
+      icon: Calendar,
+      tag: "Schedule"
+    },
+    {
+      id: 16,
+      category: "OPERATIONS",
+      title: "Pulse Polls & Surveys",
+      description: "Company-wide & project-sprint live voting with real-time percentage distribution bars.",
+      icon: Vote,
+      tag: "Surveys"
+    },
+    {
+      id: 17,
+      category: "OPERATIONS",
+      title: "Real-Time Notification Center",
+      description: "Role-based and user-targeted notifications for project assignments, approvals, and payouts.",
+      icon: Sparkles,
+      tag: "Alerts"
+    },
+    {
+      id: 18,
+      category: "SPRINTS",
+      title: "Digital Certificate Generator",
+      description: "Verifiable credentials (NEXA-CERT-XXXX), automatic project completion issuance, and printable diplomas.",
+      icon: Medal,
+      tag: "Credentials"
+    },
+    {
+      id: 19,
+      category: "FINANCE",
+      title: "Corporate OpEx & Runway Ledger",
+      description: "HR-confidential expenditure tracker (Cloud, SaaS, Hardware, Facilities), burn rate, and runway metrics.",
+      icon: FileText,
+      tag: "OpEx"
+    },
+    {
+      id: 20,
+      category: "FINANCE",
+      title: "Visual Analytics Dashboard",
+      description: "Chart.js interactive BI charts for 6-month payroll, 7-day attendance heatmap, and sprint velocity.",
+      icon: Activity,
+      tag: "Analytics"
+    }
   ];
+
+  const filteredModules = featureCategory === "ALL" 
+    ? allModules 
+    : allModules.filter(m => m.category === featureCategory);
 
   const faqs = [
     {
-      q: "Is NexaCore fully decoupled?",
-      a: "Yes. The Next.js frontend runs entirely independently on port 3000 and communicates via REST API endpoints with the Express backend on port 5000."
+      q: "How does NexaCore enforce Role-Based Access Control (RBAC)?",
+      a: "NexaCore utilizes Better-Auth with custom role schema hooks and Express roleGuard middlewares. Users are categorized as HR, Project Manager, or Software Engineer, with strict route protection on both backend controllers and Next.js frontend pages."
     },
     {
-      q: "How does the role-based middleware work?",
-      a: "The Express API interceptors verify cookies sent with credentials. Requests are authenticated against Better Auth sessions and authorized against Prisma roles before hitting controllers."
+      q: "How does Geofenced Attendance work?",
+      a: "The attendance module queries the device's HTML5 Geolocation coordinates and computes the exact distance against the corporate campus (BRAC University: Lat 23.7749, Lng 90.4255) using the mathematical Haversine formula. Check-in is granted only within the 200-meter radius."
     },
     {
-      q: "Can employees register themselves?",
-      a: "No. To maintain corporate compliance, public sign-ups are disabled. All employee accounts must be provisioned internally by an authorized HR administrator."
+      q: "Are corporate financial and OpEx ledgers protected?",
+      a: "Yes. Company Finance Management and Visual Analytics are strictly restricted to HR administrators with backend 403 authorization gates and frontend client-side redirects."
+    },
+    {
+      q: "How does automated Project Certificate generation function?",
+      a: "When an HR administrator approves the final project settlement, cryptographic verifiable certificates (e.g. NEXA-CERT-XXXX) are automatically generated for all team members, complete with landscape printable diploma formats."
     }
   ];
 
   return (
     <div className={`min-h-screen flex flex-col font-sans transition-colors duration-150 ${
-      darkMode ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900"
+      darkMode ? "bg-zinc-950 text-white" : "bg-slate-50 text-slate-900"
     }`}>
+      
       {/* Top Banner Control */}
-      <div className={`w-full py-2.5 px-4 text-center text-xs font-semibold flex items-center justify-center gap-3 border-b transition-colors duration-150 ${
-        darkMode ? "bg-slate-900 border-slate-800 text-slate-350" : "bg-slate-100 border-slate-200 text-slate-600"
+      <div className={`w-full py-2 px-4 text-center text-xs font-semibold flex items-center justify-between sm:justify-center gap-3 border-b transition-colors duration-150 ${
+        darkMode ? "bg-zinc-900 border-zinc-800 text-zinc-400" : "bg-slate-100 border-slate-200 text-slate-600"
       }`}>
-        <span>Enterprise Portal Theme:</span>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-[11px] font-bold">NexaCore Enterprise System v3.0 — 20 Production Modules Live</span>
+        </div>
+
         <button
           onClick={() => setDarkMode(!darkMode)}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded border shadow-xs text-xs font-bold transition-all ${
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border shadow-xs text-[11px] font-bold transition-all cursor-pointer ${
             darkMode 
-              ? "bg-white border-slate-200 text-slate-950 hover:bg-slate-100" 
-              : "bg-slate-900 border-slate-900 text-white hover:bg-slate-800"
+              ? "bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700" 
+              : "bg-white border-slate-200 text-slate-900 hover:bg-slate-50"
           }`}
         >
           {darkMode ? (
             <>
-              <Sun className="h-3 w-3 text-amber-500 fill-amber-500" />
-              Light Mode
+              <Sun className="h-3 w-3 text-amber-400 fill-amber-400" />
+              <span>Light Mode</span>
             </>
           ) : (
             <>
-              <Moon className="h-3 w-3 text-indigo-400 fill-indigo-400" />
-              Dark Mode
+              <Moon className="h-3 w-3 text-indigo-500 fill-indigo-500" />
+              <span>Dark Mode</span>
             </>
           )}
         </button>
@@ -130,257 +281,273 @@ export default function Home() {
 
       <main className="flex-grow pt-16">
         
-        {/* HERO SECTION */}
-        <section className="py-20 md:py-28 border-b border-slate-200 bg-white">
+        {/* ======================================================== */}
+        {/* HERO SECTION WITH GLOWING ACCENTS & LIVE DASHBOARD MOCKUP */}
+        {/* ======================================================== */}
+        <section className={`relative py-20 md:py-32 border-b overflow-hidden ${
+          darkMode ? "bg-zinc-950 border-zinc-900" : "bg-white border-slate-200"
+        }`}>
+          {/* Ambient Glow Gradients */}
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-indigo-500/10 via-blue-500/15 to-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
+
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-12 gap-12 items-center">
+            <div className="text-center max-w-3xl mx-auto space-y-6">
               
-              {/* Text Area */}
-              <div className="lg:col-span-7 space-y-6 text-left">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-600 uppercase tracking-wider">
-                  NexaCore Operating System v2.0
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold transition-all bg-indigo-50/70 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 shadow-xs">
+                <Sparkles className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
+                <span>Next-Gen Enterprise Workforce & Sprint Platform</span>
+              </div>
+
+              <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.1] text-slate-900 dark:text-white">
+                Where high-velocity teams <br className="hidden sm:inline" />
+                <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  coordinate, execute & scale.
+                </span>
+              </h1>
+
+              <p className="text-sm sm:text-lg leading-relaxed text-slate-600 dark:text-zinc-400 max-w-2xl mx-auto font-normal">
+                A unified operating system combining Geofenced Attendance, Markdown Kanban Sprints, Automated Payroll Slips, HR OpEx Management, and Cryptographic Digital Credentials.
+              </p>
+
+              {/* CTAs */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
+                <Link
+                  href="/login"
+                  className="w-full sm:w-auto inline-flex items-center justify-center text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 transition-all px-7 py-3.5 rounded-xl shadow-md gap-2 hover:scale-105 active:scale-95 cursor-pointer"
+                >
+                  <span>Launch Workspace</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <a
+                  href="#modules"
+                  className="w-full sm:w-auto inline-flex items-center justify-center text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-200 transition-all px-6 py-3.5 rounded-xl cursor-pointer"
+                >
+                  Explore 20 Modules
+                </a>
+              </div>
+
+              {/* Trust Badges */}
+              <div className="pt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-bold text-slate-550 dark:text-zinc-400">
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                  <span>Better-Auth RBAC</span>
                 </div>
-
-                <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight text-slate-900">
-                  The central engine for <span className="text-slate-500">company operations.</span>
-                </h1>
-
-                <p className="text-sm sm:text-base leading-relaxed text-slate-550 max-w-xl">
-                  A high-performance, decoupled SaaS platform designed to manage role authorizations, attendance logs, Kanban boards, chat channels, and monthly salary slip distributions.
-                </p>
-
-                {/* Dual CTAs */}
-                <div className="flex flex-row items-center gap-3 pt-2">
-                  <Link
-                    href="/login"
-                    className="inline-flex items-center justify-center text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 active:bg-slate-950 transition-colors duration-150 px-6 py-3 rounded-md shadow-xs gap-1"
-                  >
-                    Enter Workspace
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                  <a
-                    href="#features"
-                    className="inline-flex items-center justify-center text-xs font-bold bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors duration-150 px-6 py-3 rounded-md"
-                  >
-                    Explore Modules
-                  </a>
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                  <span>Prisma MongoDB Engine</span>
                 </div>
-
-                {/* Symmetrical Badges */}
-                <div className="pt-6 border-t border-slate-100 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-bold text-slate-550">
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                    Better Auth Security
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                    Prisma Client Mappings
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                    Internal Provisioning
-                  </div>
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                  <span>Chart.js Visual BI</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                  <span>React 19 Decoupled</span>
                 </div>
               </div>
 
-              {/* Symmetrical Mock UI Block (Right) */}
-              <div className="lg:col-span-5 w-full max-w-lg mx-auto lg:max-w-none">
-                <div className="rounded-xl border border-slate-200 p-6 bg-slate-50 text-slate-700 shadow-sm">
-                  {/* Top bar header */}
-                  <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-200">
-                    <div className="flex space-x-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-slate-300" />
-                      <span className="w-2.5 h-2.5 rounded-full bg-slate-300" />
-                      <span className="w-2.5 h-2.5 rounded-full bg-slate-300" />
-                    </div>
-                    <div className="px-2.5 py-0.5 rounded bg-white border border-slate-200 text-[9px] font-mono tracking-wider font-bold text-slate-500">
-                      LIVE WORKSPACE
-                    </div>
+            </div>
+
+            {/* LIVE DASHBOARD CANVAS MOCKUP */}
+            <div className="mt-14 max-w-5xl mx-auto rounded-3xl border border-slate-200 dark:border-zinc-800 bg-slate-50/60 dark:bg-zinc-900/60 p-3 sm:p-5 shadow-2xl backdrop-blur-md">
+              {/* Window Header */}
+              <div className="flex items-center justify-between pb-3 px-2 border-b border-slate-200 dark:border-zinc-800">
+                <div className="flex space-x-1.5">
+                  <span className="w-3 h-3 rounded-full bg-rose-500/80" />
+                  <span className="w-3 h-3 rounded-full bg-amber-500/80" />
+                  <span className="w-3 h-3 rounded-full bg-emerald-500/80" />
+                </div>
+                <div className="px-3 py-0.5 rounded-full bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-[10px] font-mono font-bold text-slate-600 dark:text-zinc-300 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                  NEXACORE LIVE PRODUCTION INSTANCE
+                </div>
+                <div className="text-[10px] font-bold text-slate-400">LAT: 23.7749 &bull; LNG: 90.4255</div>
+              </div>
+
+              {/* Mock Dashboard Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 text-left font-sans">
+                
+                {/* Card 1: Geofenced Attendance Radar */}
+                <div className="p-4 bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200 dark:border-zinc-850 space-y-3 shadow-xs">
+                  <div className="flex justify-between items-center text-xs font-extrabold">
+                    <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
+                      <MapPin className="h-4 w-4" /> Geofenced Radar
+                    </span>
+                    <span className="text-[9px] bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400 font-extrabold px-2 py-0.5 rounded-full">
+                      200m Radius Match
+                    </span>
                   </div>
-
-                  {/* Mock content */}
-                  <div className="space-y-4 font-sans">
-                    {/* Live Metric Cards */}
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="p-3 bg-white border border-slate-200 rounded-lg">
-                        <span className="text-[9px] font-bold uppercase text-slate-400 block mb-1">Staff</span>
-                        <div className="text-sm font-bold text-slate-900 flex items-center gap-1">
-                          1,248
-                          <span className="text-[8px] text-emerald-500 font-bold">+12%</span>
-                        </div>
-                      </div>
-
-                      <div className="p-3 bg-white border border-slate-200 rounded-lg">
-                        <span className="text-[9px] font-bold uppercase text-slate-400 block mb-1">Projects</span>
-                        <div className="text-sm font-bold text-slate-900">42</div>
-                      </div>
-
-                      <div className="p-3 bg-white border border-slate-200 rounded-lg">
-                        <span className="text-[9px] font-bold uppercase text-slate-400 block mb-1">Tasks</span>
-                        <div className="text-sm font-bold text-slate-900 flex items-center gap-1">
-                          84
-                          <span className="text-[8px] text-indigo-500 font-bold">65%</span>
-                        </div>
-                      </div>
+                  <div className="p-3 bg-slate-50 dark:bg-zinc-900 rounded-xl space-y-1.5">
+                    <div className="flex justify-between text-[11px] font-bold">
+                      <span className="text-slate-500">BRAC University Campus</span>
+                      <span className="text-emerald-600 font-mono">09:14 AM</span>
                     </div>
-
-                    {/* Attendance widget representation */}
-                    <div className="p-3.5 bg-white border border-slate-200 rounded-lg flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="p-1.5 bg-emerald-50 text-emerald-600 rounded">
-                          <Clock className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-slate-900">Attendance Log</p>
-                          <p className="text-[9px] text-slate-400">Jane checked in at 09:12 AM</p>
-                        </div>
-                      </div>
-                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-[9px] font-bold text-emerald-700">
-                        Active
-                      </span>
-                    </div>
-
-                    {/* Chat widget representation */}
-                    <div className="p-3.5 bg-white border border-slate-200 rounded-lg flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-200/50 flex items-center justify-center text-[9px] font-bold text-indigo-600 shrink-0">PM</div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-bold text-slate-900 truncate">Marcus Vance (PM)</p>
-                        <p className="text-[10px] text-slate-500 truncate">Completed salary calculations checks.</p>
-                      </div>
-                      <span className="text-[8px] text-slate-400">Just now</span>
+                    <div className="text-[10px] text-slate-400 font-medium">
+                      Status: <strong className="text-slate-900 dark:text-white">On-Time Checked In</strong>
                     </div>
                   </div>
                 </div>
+
+                {/* Card 2: Kanban Sprint Pipeline */}
+                <div className="p-4 bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200 dark:border-zinc-850 space-y-3 shadow-xs">
+                  <div className="flex justify-between items-center text-xs font-extrabold">
+                    <span className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400">
+                      <Layers className="h-4 w-4" /> Sprint Kanban
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-bold">14 Live Tasks</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="p-2.5 bg-slate-50 dark:bg-zinc-900 rounded-xl flex justify-between items-center text-[11px] font-bold">
+                      <span>#NEXA-88: Auth Token Refresh</span>
+                      <span className="text-[9px] bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 px-2 py-0.5 rounded font-black">TESTING</span>
+                    </div>
+                    <div className="w-full bg-slate-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+                      <div className="h-full bg-indigo-600 rounded-full" style={{ width: "75%" }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card 3: OpEx & Capital Runway */}
+                <div className="p-4 bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200 dark:border-zinc-850 space-y-3 shadow-xs">
+                  <div className="flex justify-between items-center text-xs font-extrabold">
+                    <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                      <DollarSign className="h-4 w-4" /> OpEx & Runway
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-bold">Q3 2026</span>
+                  </div>
+                  <div className="flex justify-between items-baseline pt-1">
+                    <div>
+                      <div className="text-xl font-black text-slate-900 dark:text-white">$217,300</div>
+                      <span className="text-[9px] text-slate-400 font-bold">Total Liquidity Reserve</span>
+                    </div>
+                    <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
+                      4.2 Mo Runway
+                    </span>
+                  </div>
+                </div>
+
               </div>
             </div>
+
           </div>
         </section>
 
-        {/* TRUSTED BY / SOCIAL PROOF */}
-        <section className="py-10 border-b border-slate-200 bg-slate-50">
-          <div className="max-w-7xl mx-auto px-4 text-center">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-6">
-              Trusted by high-performance operations teams
-            </span>
-            <div className="flex flex-wrap items-center justify-center gap-12 grayscale opacity-55">
-              <span className="text-sm font-extrabold text-slate-800 tracking-tight">APEX GLOBAL</span>
-              <span className="text-sm font-extrabold text-slate-800 tracking-tight">MUNICH TECH</span>
-              <span className="text-sm font-extrabold text-slate-800 tracking-tight">APEX CORP</span>
-              <span className="text-sm font-extrabold text-slate-800 tracking-tight">WORKLY</span>
-            </div>
-          </div>
-        </section>
-
-        {/* INTERACTIVE WORKSPACE SHOWCASE */}
-        <section id="solutions" className="py-20 bg-white border-b border-slate-200">
+        {/* ======================================================== */}
+        {/* INTERACTIVE ROLE EXPERIENCE SHOWCASE                     */}
+        {/* ======================================================== */}
+        <section id="solutions" className={`py-24 border-b ${
+          darkMode ? "bg-zinc-900/50 border-zinc-900" : "bg-slate-50 border-slate-200"
+        }`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-12 space-y-4">
-              <span className="text-xs font-bold uppercase tracking-widest text-slate-500">
-                Interactive Showcase
+            <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
+              <span className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+                Tailored Organizational Workflows
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
-                Adapts to every corporate role
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                Engineered for Every Corporate Role
               </h2>
-              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed max-w-xl mx-auto">
-                Select a workspace role below to see how the dashboard dynamically adapts components and tools.
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 leading-relaxed max-w-xl mx-auto">
+                Toggle roles below to preview the customized toolsets and operational dashboards available to each user group.
               </p>
             </div>
 
-            {/* Selector Tabs */}
-            <div className="flex justify-center mb-8">
-              <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
-                <button
-                  onClick={() => setActiveTab("HR")}
-                  className={`px-6 py-2 rounded text-xs font-bold transition-all ${
-                    activeTab === "HR" 
-                      ? "bg-slate-900 text-white shadow-xs" 
-                      : "text-slate-600 hover:text-slate-900"
-                  }`}
-                >
-                  HR Admin
-                </button>
-                <button
-                  onClick={() => setActiveTab("PM")}
-                  className={`px-6 py-2 rounded text-xs font-bold transition-all ${
-                    activeTab === "PM" 
-                      ? "bg-slate-900 text-white shadow-xs" 
-                      : "text-slate-600 hover:text-slate-900"
-                  }`}
-                >
-                  Project Manager
-                </button>
-                <button
-                  onClick={() => setActiveTab("EMPLOYEE")}
-                  className={`px-6 py-2 rounded text-xs font-bold transition-all ${
-                    activeTab === "EMPLOYEE" 
-                      ? "bg-slate-900 text-white shadow-xs" 
-                      : "text-slate-600 hover:text-slate-900"
-                  }`}
-                >
-                  Employee
-                </button>
+            {/* Role Switcher */}
+            <div className="flex justify-center mb-10">
+              <div className="flex bg-slate-200/70 dark:bg-zinc-900 p-1.5 rounded-2xl gap-1 border border-slate-300/60 dark:border-zinc-800">
+                {[
+                  { id: "HR", label: "HR Administrator", icon: Shield },
+                  { id: "PM", label: "Project Manager", icon: Briefcase },
+                  { id: "EMPLOYEE", label: "Software Engineer", icon: Users }
+                ].map(r => {
+                  const Icon = r.icon;
+                  const isActive = activeTab === r.id;
+                  return (
+                    <button
+                      key={r.id}
+                      onClick={() => setActiveTab(r.id as any)}
+                      className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                        isActive
+                          ? "bg-slate-900 text-white dark:bg-white dark:text-zinc-950 shadow-md"
+                          : "text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span>{r.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Showcase Cards */}
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-8 max-w-4xl mx-auto shadow-xs">
+            {/* Dynamic Role Card */}
+            <div className="bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-850 rounded-3xl p-8 sm:p-10 max-w-5xl mx-auto shadow-sm">
               {activeTab === "HR" && (
-                <div className="grid md:grid-cols-2 gap-8 items-center animate-in fade-in duration-300">
-                  <div className="space-y-4 text-left">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-650 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
-                      Core Administrator Control
-                    </span>
-                    <h3 className="text-xl font-bold text-slate-900">Provision & Audit Ledger</h3>
-                    <p className="text-xs text-slate-550 leading-relaxed font-medium">
-                      HR managers have full security clearance. Provision new employee logins via transactions, write global board alerts, process monthly payslips, and review loan advances.
-                    </p>
-                    <ul className="space-y-2 text-xs font-semibold text-slate-600">
-                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Onboard Employees</li>
-                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Compile Salary PDF slips</li>
-                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Resolve Grievances</li>
-                    </ul>
-                  </div>
-                  <div className="bg-white border border-slate-200 rounded-lg p-5 space-y-4">
-                    <div className="flex justify-between items-center text-xs font-bold">
-                      <span>Payroll Process Status</span>
-                      <span className="text-emerald-600">Completed</span>
+                <div className="grid md:grid-cols-2 gap-8 items-center text-left animate-in fade-in duration-300">
+                  <div className="space-y-4">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
+                      Organizational Governance & Finance
                     </div>
-                    <div className="space-y-2.5">
-                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-1.5 bg-slate-900 rounded-full" style={{ width: "100%" }} />
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white">
+                      Full Staff Audit & Executive Command
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">
+                      HR administrators hold top clearance across onboarding pipelines, salary slip compiling, loan reviews, grievance investigations, company-wide pulse surveys, and confidential OpEx budget tracking.
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 text-xs font-bold text-slate-700 dark:text-zinc-300">
+                      <div className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Employee Onboarding</div>
+                      <div className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Automated Payslip Engine</div>
+                      <div className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> OpEx Ledger & Runway</div>
+                      <div className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Grievance Resolution</div>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50 dark:bg-zinc-900/60 p-6 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-4">
+                    <div className="flex justify-between items-center text-xs font-bold pb-2 border-b border-slate-200 dark:border-zinc-800">
+                      <span>Monthly Payroll Execution</span>
+                      <span className="text-emerald-600 font-extrabold">100% Processed</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-[11px] font-bold">
+                        <span className="text-slate-400">August 2026 Batch</span>
+                        <span>$45,000 Total Outlay</span>
                       </div>
-                      <p className="text-[10px] text-slate-400">1,248 accounts successfully processed.</p>
+                      <div className="h-2 w-full bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: "100%" }} />
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
 
               {activeTab === "PM" && (
-                <div className="grid md:grid-cols-2 gap-8 items-center animate-in fade-in duration-300">
-                  <div className="space-y-4 text-left">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-650 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
-                      Manager Allocation console
-                    </span>
-                    <h3 className="text-xl font-bold text-slate-900">Task Boards & Appraisals</h3>
-                    <p className="text-xs text-slate-550 leading-relaxed font-medium">
-                      Project Managers organize localized team sprint workloads, drag tasks on the Kanban board, schedule booked meeting rooms, and execute stars evaluations.
+                <div className="grid md:grid-cols-2 gap-8 items-center text-left animate-in fade-in duration-300">
+                  <div className="space-y-4">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                      Sprint Velocity & Deliverables
+                    </div>
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white">
+                      PM Command Center & Kanban Workspace
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">
+                      Project Managers manage localized agile sprint lifecycles, assign Markdown tickets, schedule corporate meeting rooms with collision prevention, conduct 360° star evaluations, and launch sprint surveys.
                     </p>
-                    <ul className="space-y-2 text-xs font-semibold text-slate-600">
-                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Project Allocations</li>
-                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Drag-and-drop Kanban</li>
-                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Team Performance Ratings</li>
-                    </ul>
+                    <div className="grid grid-cols-2 gap-2 text-xs font-bold text-slate-700 dark:text-zinc-300">
+                      <div className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> PM Command Dashboard</div>
+                      <div className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Markdown Sprint Board</div>
+                      <div className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Team Star Reviews</div>
+                      <div className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Room Concurrency Limits</div>
+                    </div>
                   </div>
-                  <div className="bg-white border border-slate-200 rounded-lg p-5 space-y-4 text-left">
-                    <h4 className="text-xs font-bold uppercase text-slate-400">Kanban Progress</h4>
-                    <div className="space-y-3">
-                      <div className="p-2.5 bg-slate-50 border border-slate-200 rounded text-xs font-bold flex justify-between">
-                        <span>Sprint Tasks Active</span>
-                        <span className="text-indigo-600">84 Tickets</span>
-                      </div>
-                      <div className="p-2.5 bg-slate-50 border border-slate-200 rounded text-xs font-bold flex justify-between">
-                        <span>Milestones Target</span>
-                        <span className="text-slate-900">July 20</span>
+
+                  <div className="bg-slate-50 dark:bg-zinc-900/60 p-6 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-4">
+                    <div className="flex justify-between items-center text-xs font-bold pb-2 border-b border-slate-200 dark:border-zinc-800">
+                      <span>Project Sprint Velocity</span>
+                      <span className="text-indigo-600 font-extrabold">Active Delivery</span>
+                    </div>
+                    <div className="space-y-2.5">
+                      <div className="p-3 bg-white dark:bg-zinc-950 rounded-xl border border-slate-200 dark:border-zinc-800 flex justify-between text-xs font-bold">
+                        <span>Autonomous Task Queue</span>
+                        <span className="text-amber-600">84% Velocity</span>
                       </div>
                     </div>
                   </div>
@@ -388,204 +555,235 @@ export default function Home() {
               )}
 
               {activeTab === "EMPLOYEE" && (
-                <div className="grid md:grid-cols-2 gap-8 items-center animate-in fade-in duration-300">
-                  <div className="space-y-4 text-left">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-650 bg-amber-50 px-2 py-0.5 rounded border border-amber-100">
-                      Staff Self Service portal
-                    </span>
-                    <h3 className="text-xl font-bold text-slate-900">Check-in, Leaves & Loans</h3>
-                    <p className="text-xs text-slate-550 leading-relaxed font-medium">
-                      Employees clock in attendance daily, submit requests for WFH or annual leave, check monthly payslips, and collaborate on WebSocket project chat rooms.
+                <div className="grid md:grid-cols-2 gap-8 items-center text-left animate-in fade-in duration-300">
+                  <div className="space-y-4">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+                      Engineer Self-Service Hub
+                    </div>
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white">
+                      Check-In, Sprints, Chat & Certifications
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">
+                      Developers clock in with geofenced GPS validation, claim Kanban sprint tickets, collaborate in Slack-style project chat channels, request leaves & WFH, and earn cryptographic project diplomas.
                     </p>
-                    <ul className="space-y-2 text-xs font-semibold text-slate-600">
-                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Daily Clock In/Out</li>
-                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Submit WFH & Leaves</li>
-                      <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Emergency Loan Applications</li>
-                    </ul>
+                    <div className="grid grid-cols-2 gap-2 text-xs font-bold text-slate-700 dark:text-zinc-300">
+                      <div className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Geofenced Attendance</div>
+                      <div className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Slack-Style Project Chat</div>
+                      <div className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Digital Credentials</div>
+                      <div className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Emergency Loan Portal</div>
+                    </div>
                   </div>
-                  <div className="bg-white border border-slate-200 rounded-lg p-5 space-y-3 text-left">
-                    <h4 className="text-xs font-bold text-slate-900">My Leave Balance</h4>
-                    <div className="flex justify-between items-baseline gap-2 pt-1">
-                      <span className="text-2xl font-bold text-slate-900">14 Days</span>
-                      <span className="text-[10px] text-slate-400 font-bold">Annual time off</span>
+
+                  <div className="bg-slate-50 dark:bg-zinc-900/60 p-6 rounded-2xl border border-slate-200 dark:border-zinc-800 space-y-4">
+                    <div className="flex justify-between items-center text-xs font-bold pb-2 border-b border-slate-200 dark:border-zinc-800">
+                      <span>Credentials & Honors</span>
+                      <span className="text-amber-500 font-extrabold flex items-center gap-1"><Medal className="h-4 w-4" /> Verified</span>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-zinc-950 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs font-bold space-y-1">
+                      <div className="text-slate-900 dark:text-white">Full-Stack Core Architecture</div>
+                      <div className="text-[10px] text-slate-400 font-mono">Code: NEXA-CERT-2026-8812</div>
                     </div>
                   </div>
                 </div>
               )}
             </div>
+
           </div>
         </section>
 
-        {/* FEATURES GRID SECTION */}
-        <section id="features" className="py-20 bg-slate-50 border-b border-slate-200">
+        {/* ======================================================== */}
+        {/* COMPLETE 20-MODULE ENTERPRISE FEATURE SUITE              */}
+        {/* ======================================================== */}
+        <section id="modules" className={`py-24 border-b ${
+          darkMode ? "bg-zinc-950 border-zinc-900" : "bg-white border-slate-200"
+        }`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-              <span className="text-xs font-bold uppercase tracking-widest text-slate-500">
-                Platform Capabilities
+            <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
+              <span className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+                Complete 20-Point Specification
               </span>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
-                Engineered for corporate logistics
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                Everything Your Enterprise Needs
               </h2>
-              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed max-w-xl mx-auto">
-                Explore the functional modules designed to handle resource coordination, financial workflows, and operational audits.
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 leading-relaxed max-w-xl mx-auto">
+                Filter by category to explore all 20 modules implemented into the unified NexaCore architecture.
               </p>
             </div>
 
-            {/* Features Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {features.map((feat, idx) => {
-                const Icon = feat.icon;
+            {/* Category Filter Pills */}
+            <div className="flex justify-center mb-10 overflow-x-auto">
+              <div className="flex bg-slate-100 dark:bg-zinc-900 p-1.5 rounded-2xl gap-1 text-xs font-bold">
+                {[
+                  { id: "ALL", label: "All 20 Modules" },
+                  { id: "SPRINTS", label: "Sprints & Kanban" },
+                  { id: "ATTENDANCE", label: "Attendance & Leaves" },
+                  { id: "FINANCE", label: "Payroll & Finance" },
+                  { id: "OPERATIONS", label: "Governance & Operations" },
+                ].map(c => (
+                  <button
+                    key={c.id}
+                    onClick={() => setFeatureCategory(c.id)}
+                    className={`px-4 py-2 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
+                      featureCategory === c.id
+                        ? "bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs"
+                        : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Modules Grid */}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
+              {filteredModules.map(mod => {
+                const Icon = mod.icon;
                 return (
                   <div
-                    key={idx}
-                    className="p-8 rounded-xl border border-slate-200 bg-white shadow-xs hover:border-slate-350 transition-all flex flex-col justify-between items-start"
+                    key={mod.id}
+                    className="p-6 rounded-3xl border border-slate-200 dark:border-zinc-850 bg-slate-50/50 dark:bg-zinc-900/30 hover:border-slate-400 dark:hover:border-zinc-700 transition-all flex flex-col justify-between space-y-4 hover:-translate-y-1 duration-200 shadow-xs"
                   >
-                    <div>
-                      <div className="p-2.5 rounded-lg bg-slate-100 text-slate-900 mb-6 w-fit">
-                        <Icon className="h-5 w-5" />
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div className="p-2.5 rounded-xl bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs">
+                          <Icon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                        <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-200/80 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400">
+                          {mod.tag}
+                        </span>
                       </div>
-                      <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-2">
-                        {feat.tag}
-                      </span>
-                      <h3 className="text-sm font-bold text-slate-900 mb-2">
-                        {feat.title}
-                      </h3>
-                      <p className="text-xs text-slate-500 leading-relaxed font-medium">
-                        {feat.description}
+                      <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                        {mod.id}. {mod.title}
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed font-medium">
+                        {mod.description}
                       </p>
                     </div>
                   </div>
                 );
               })}
             </div>
+
           </div>
         </section>
 
-        {/* 3-TIER PRICING MATRIX */}
-        <section id="pricing" className="py-20 bg-white border-b border-slate-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-              <span className="text-xs font-bold uppercase tracking-widest text-slate-500">
-                Corporate Plans
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
-                Transparent packages for teams
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed max-w-xl mx-auto">
-                Choose a plan tailored to your headcount requirements. Starter models feature full portal access.
-              </p>
+        {/* ======================================================== */}
+        {/* LIVE CRYPTOGRAPHIC CERTIFICATE VERIFIER SIMULATOR        */}
+        {/* ======================================================== */}
+        <section className={`py-20 border-b ${
+          darkMode ? "bg-zinc-900/40 border-zinc-900" : "bg-slate-50 border-slate-200"
+        }`}>
+          <div className="max-w-4xl mx-auto px-4 text-center space-y-6">
+            <span className="text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
+              Module 18 Real-Time Verification Engine
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+              Instant Credential Verification Simulator
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 max-w-lg mx-auto">
+              Test the real-time cryptographic verification engine used to authenticate project completion diplomas.
+            </p>
+
+            <div className="flex max-w-md mx-auto bg-white dark:bg-zinc-900 p-2 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm gap-2">
+              <input
+                type="text"
+                value={simCertCode}
+                onChange={(e) => setSimCertCode(e.target.value)}
+                placeholder="Enter certificate code..."
+                className="flex-1 px-3 bg-transparent text-xs font-mono font-bold text-slate-900 dark:text-white outline-none"
+              />
+              <button
+                onClick={() => setCertVerified(true)}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl cursor-pointer shadow-xs transition-all"
+              >
+                Verify Code
+              </button>
             </div>
 
-            {/* Tiers Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              {/* Tier 1 */}
-              <div className="p-8 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between h-[420px]">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-900">Starter</h3>
-                    <p className="text-[10px] text-slate-500 mt-1 font-medium">For small growing offices</p>
-                  </div>
-                  <div className="text-3xl font-bold text-slate-900">
-                    $49<span className="text-xs font-semibold text-slate-400"> / mo</span>
-                  </div>
-                  <ul className="space-y-2 text-xs font-medium text-slate-600">
-                    <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-emerald-500" /> Up to 50 employees</li>
-                    <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-emerald-500" /> Basic check-in logs</li>
-                    <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-emerald-500" /> Leave applications</li>
-                  </ul>
+            {certVerified && (
+              <div className="max-w-md mx-auto p-4 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-500/30 rounded-2xl text-left text-xs space-y-2 animate-in zoom-in-95 duration-200">
+                <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-extrabold">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>Official NexaCore Credential Authenticated</span>
                 </div>
-                <button onClick={() => alert("Redirecting to starter checkout...")} className="w-full bg-white border border-slate-200 text-slate-900 font-bold py-2 rounded text-xs hover:bg-slate-50 transition-all cursor-pointer">
-                  Get Started
-                </button>
-              </div>
-
-              {/* Tier 2 (Highlighted) */}
-              <div className="p-8 rounded-xl border border-slate-900 bg-slate-900 text-white flex flex-col justify-between h-[420px] relative shadow-md">
-                <span className="absolute -top-3 right-6 bg-yellow-400 text-slate-900 font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-full border border-yellow-300">
-                  Popular
-                </span>
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-bold text-white">Professional</h3>
-                    <p className="text-[10px] text-slate-400 mt-1 font-medium">For mid-sized operations</p>
-                  </div>
-                  <div className="text-3xl font-bold text-white">
-                    $199<span className="text-xs font-semibold text-slate-400"> / mo</span>
-                  </div>
-                  <ul className="space-y-2 text-xs font-medium text-slate-300">
-                    <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-yellow-400" /> Up to 500 employees</li>
-                    <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-yellow-400" /> Auto payroll PDF slips</li>
-                    <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-yellow-400" /> Kanban board tracking</li>
-                  </ul>
+                <div className="text-[11px] text-slate-600 dark:text-zinc-300 font-medium">
+                  Recipient: <strong>Abir Hasan</strong> &bull; Track: <strong>Enterprise System Architecture</strong>
                 </div>
-                <button onClick={() => alert("Redirecting to professional checkout...")} className="w-full bg-yellow-400 text-slate-900 font-bold py-2 rounded text-xs hover:bg-yellow-500 transition-all cursor-pointer">
-                  Choose Plan
-                </button>
-              </div>
-
-              {/* Tier 3 */}
-              <div className="p-8 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between h-[420px]">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-900">Enterprise</h3>
-                    <p className="text-[10px] text-slate-500 mt-1 font-medium">For large global corporations</p>
-                  </div>
-                  <div className="text-3xl font-bold text-slate-900">
-                    $499<span className="text-xs font-semibold text-slate-400"> / mo</span>
-                  </div>
-                  <ul className="space-y-2 text-xs font-medium text-slate-600">
-                    <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-emerald-500" /> Unlimited headcounts</li>
-                    <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-emerald-500" /> Audit financial loggers</li>
-                    <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-emerald-500" /> Dedicated support team</li>
-                  </ul>
+                <div className="text-[10px] text-slate-400 font-mono">
+                  Issuer: NexaCore Operations Board &bull; Status: Valid
                 </div>
-                <button onClick={() => alert("Contacting sales team...")} className="w-full bg-white border border-slate-200 text-slate-900 font-bold py-2 rounded text-xs hover:bg-slate-50 transition-all cursor-pointer">
-                  Contact Sales
-                </button>
               </div>
-            </div>
+            )}
           </div>
         </section>
 
-        {/* DETAILED FAQ ACCORDION */}
-        <section className="py-20 bg-slate-50 border-b border-slate-200">
+        {/* ======================================================== */}
+        {/* INTERACTIVE FAQ ACCORDION                                */}
+        {/* ======================================================== */}
+        <section className={`py-24 border-b ${
+          darkMode ? "bg-zinc-950 border-zinc-900" : "bg-white border-slate-200"
+        }`}>
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <span className="text-xs font-bold uppercase tracking-widest text-slate-500">FAQ</span>
-              <h2 className="text-2xl font-bold text-slate-900 mt-2">Common Queries</h2>
+            <div className="text-center mb-12 space-y-2">
+              <span className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+                Architecture & Security
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+                Frequently Asked Questions
+              </h2>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-3">
               {faqs.map((faq, idx) => (
-                <div key={idx} className="p-5 bg-white border border-slate-200 rounded-lg text-left">
-                  <h4 className="text-xs font-bold text-slate-900 flex items-center gap-2">
-                    <HelpCircle className="h-4 w-4 text-slate-400 shrink-0" />
-                    {faq.q}
-                  </h4>
-                  <p className="text-xs text-slate-550 mt-2 leading-relaxed font-medium pl-6">
-                    {faq.a}
-                  </p>
+                <div 
+                  key={idx} 
+                  className="rounded-2xl border border-slate-200 dark:border-zinc-850 bg-slate-50/50 dark:bg-zinc-900/40 overflow-hidden text-left transition-all"
+                >
+                  <button
+                    onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                    className="w-full p-5 flex justify-between items-center text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white cursor-pointer"
+                  >
+                    <span className="flex items-center gap-3">
+                      <HelpCircle className="h-4 w-4 text-indigo-500 shrink-0" />
+                      {faq.q}
+                    </span>
+                    <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${openFaq === idx ? "rotate-180" : ""}`} />
+                  </button>
+                  {openFaq === idx && (
+                    <div className="px-5 pb-5 pt-1 text-xs text-slate-500 dark:text-zinc-400 leading-relaxed font-medium pl-12 border-t border-slate-200/50 dark:border-zinc-800/50 animate-in fade-in duration-150">
+                      {faq.a}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* BOTTOM CALL TO ACTION */}
-        <section className="py-16 bg-white text-center space-y-4">
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-            Start Syncing Your Operations Today
-          </h2>
-          <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed font-medium pb-2">
-            Provision staff profiles, process salary ledgers, and manage project workflows in a clean decoupled interface.
-          </p>
-          <Link
-            href="/login"
-            className="inline-flex items-center justify-center bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 px-8 rounded text-xs transition-all shadow-xs gap-1.5"
-          >
-            Access Portal
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+        {/* ======================================================== */}
+        {/* BOTTOM CALL TO ACTION                                    */}
+        {/* ======================================================== */}
+        <section className={`py-24 text-center ${
+          darkMode ? "bg-zinc-950" : "bg-slate-50"
+        }`}>
+          <div className="max-w-3xl mx-auto px-4 space-y-6">
+            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+              Ready to elevate your workforce operations?
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 max-w-lg mx-auto leading-relaxed">
+              Experience seamless employee management, geofenced punctuality, automated payrolls, and Kanban sprint delivery in a high-performance decoupled interface.
+            </p>
+            <div className="pt-2">
+              <Link
+                href="/login"
+                className="inline-flex items-center justify-center bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 text-white font-extrabold py-4 px-8 rounded-2xl text-xs transition-all shadow-lg gap-2 hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <span>Enter NexaCore Workspace</span>
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
         </section>
 
       </main>
