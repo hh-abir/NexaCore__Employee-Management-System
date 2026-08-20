@@ -144,13 +144,18 @@ export default function AnalyticsPage() {
   const [activeTab, setActiveTab] = useState<"OVERVIEW" | "ATTENDANCE" | "PAYROLL" | "PROJECTS" | "PERFORMANCE">("OVERVIEW");
 
   useEffect(() => {
-    if (!sessionLoading && !sessionData) {
-      router.push("/login");
+    if (!sessionLoading) {
+      if (!sessionData) {
+        router.push("/login");
+      } else if (sessionData.user.role !== "HR") {
+        toast.error("Access restricted to HR Administrators.");
+        router.push("/dashboard");
+      }
     }
   }, [sessionData, sessionLoading, router]);
 
   useEffect(() => {
-    if (sessionData) {
+    if (sessionData && sessionData.user.role === "HR") {
       fetchAnalytics();
     }
   }, [sessionData]);
@@ -288,7 +293,7 @@ export default function AnalyticsPage() {
     }
   };
 
-  if (sessionLoading || !sessionData) return null;
+  if (sessionLoading || !sessionData || sessionData.user.role !== "HR") return null;
 
   return (
     <div className="flex-grow flex flex-col space-y-6 font-sans text-slate-900 dark:text-white transition-colors duration-150 text-left">

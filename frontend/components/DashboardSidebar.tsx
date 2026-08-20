@@ -82,7 +82,7 @@ export default function DashboardSidebar() {
       title: "Dashboard",
       items: [
         { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
-        { name: "Analytics", href: "/dashboard/analytics", icon: TrendingUp },
+        ...(isHr ? [{ name: "Analytics", href: "/dashboard/analytics", icon: TrendingUp }] : []),
       ],
     },
     {

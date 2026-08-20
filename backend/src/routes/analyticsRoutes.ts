@@ -4,6 +4,6 @@ import { getAnalyticsOverview } from "../controllers/analyticsController";
 
 const router = Router();
 
-router.get("/overview", roleGuard(["HR", "PROJECT_MANAGER", "EMPLOYEE"]), getAnalyticsOverview);
+router.get("/overview", roleGuard(["HR"]), getAnalyticsOverview);
 
 export default router;
