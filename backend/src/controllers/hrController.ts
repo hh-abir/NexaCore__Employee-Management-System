@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 
 export const onboardEmployee = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { name, email, role, password } = req.body;
+    const { name, email, role, password, department, designation, phone, salary } = req.body;
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -19,10 +19,13 @@ export const onboardEmployee = async (req: AuthenticatedRequest, res: Response) 
     const newUser = await prisma.$transaction(async (tx) => {
       const u = await tx.user.create({
         data: {
-          name,
-          email,
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
           emailVerified: true,
           role,
+          department: department ? department.trim() : "Engineering",
+          designation: designation ? designation.trim() : "Software Engineer",
+          phone: phone ? phone.trim() : null,
         },
       });
 
@@ -30,21 +33,40 @@ export const onboardEmployee = async (req: AuthenticatedRequest, res: Response) 
         data: {
           userId: u.id,
           providerId: "credential",
-          accountId: email,
+          accountId: email.trim().toLowerCase(),
           password: hashedPassword,
         },
       });
+
+      // Create initial salary record if provided
+      if (salary && parseFloat(salary) > 0) {
+        const numSalary = parseFloat(salary);
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        await tx.payroll.create({
+          data: {
+            userId: u.id,
+            month: currentMonth,
+            baseSalary: numSalary,
+            bonus: 0.0,
+            deductions: 0.0,
+            netSalary: numSalary,
+            status: "PENDING",
+          }
+        });
+      }
 
       return u;
     });
 
     return res.status(201).json({
-      message: "Employee account successfully created.",
+      message: "Employee account successfully provisioned.",
       user: {
         id: newUser.id,
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,
+        department: newUser.department,
+        designation: newUser.designation,
       },
     });
   } catch (error: any) {
@@ -60,12 +82,16 @@ export const getHealthCheck = (req: AuthenticatedRequest, res: Response) => {
 export const getAllEmployees = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const users = await prisma.user.findMany({
-      orderBy: { name: "asc" },
+      orderBy: { createdAt: "desc" },
       select: {
         id: true,
         name: true,
         email: true,
-        role: true
+        role: true,
+        department: true,
+        designation: true,
+        phone: true,
+        createdAt: true,
       }
     });
     return res.status(200).json({ employees: users });

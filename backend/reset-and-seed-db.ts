@@ -81,7 +81,7 @@ async function main() {
     { name: "Zeeshan Alam", email: "zeeshan.alam@nexacore.com", designation: "Platform Operations Manager", dept: "Infrastructure" }
   ];
 
-  const createdManagers = [];
+  const createdManagers: any[] = [];
   for (const mgr of managersData) {
     const user = await prisma.user.create({
       data: {
@@ -134,7 +134,7 @@ async function main() {
     { name: "Sumaiya Rahman", email: "sumaiya.rahman@nexacore.com", designation: "Growth & Marketing Lead", dept: "Marketing", salary: 4500 }
   ];
 
-  const createdEmployees = [];
+  const createdEmployees: any[] = [];
   for (const emp of employeesData) {
     const user = await prisma.user.create({
       data: {
