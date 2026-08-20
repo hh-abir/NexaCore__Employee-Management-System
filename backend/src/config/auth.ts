@@ -42,5 +42,8 @@ export const auth = betterAuth({
       generateId: false,
     },
     useSecureCookies: process.env.NODE_ENV === "production",
+    ipAddress: {
+      ipAddressHeaders: ["x-forwarded-for", "x-real-ip", "cf-connecting-ip"],
+    },
   },
 });
