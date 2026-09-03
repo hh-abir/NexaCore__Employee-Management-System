@@ -109,6 +109,3 @@ The Express backend secures endpoints using cookie-based session verification an
 *   Authentication states map dynamically to client views using the `useSession()` hook.
 
 ---
-
-## 📄 License
-This project is private and proprietary. All rights reserved.
