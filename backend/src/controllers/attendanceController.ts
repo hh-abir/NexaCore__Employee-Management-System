@@ -216,6 +216,7 @@ export const getAttendanceHistory = async (req: AuthenticatedRequest, res: Respo
             }
           }
         }
+      });
     }
 
     return res.status(200).json({ history });

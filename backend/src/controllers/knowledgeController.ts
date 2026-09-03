@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { AuthenticatedRequest } from "../middlewares/roleGuard";
-import prisma from "../config/db";
-import { createRoleNotification } from "./notificationController";
+import { prisma } from "../config/db";
+import { createRoleNotification } from "../utils/notificationService";
 
 export const getKnowledgeDocuments = async (req: AuthenticatedRequest, res: Response) => {
   try {

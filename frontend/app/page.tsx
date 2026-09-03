@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -15,7 +15,6 @@ import {
   MapPin,
   Medal,
   Activity,
-  Code2,
   Database,
   Lock,
   Copy,
@@ -35,6 +34,11 @@ export default function Home() {
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
   const [isResetting, setIsResetting] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  useEffect(() => {
+    // Landing page is strictly white light mode
+    document.documentElement.classList.remove("dark");
+  }, []);
 
   const handleCopy = (email: string) => {
     navigator.clipboard.writeText(email);
@@ -71,21 +75,21 @@ export default function Home() {
       role: "HR Administrator",
       name: "Abir Hasan",
       email: "abir@nexacore.com",
-      badgeClass: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
+      badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
       description: "Employee registration & Drive docs, BDT payroll, financial settlements, OpEx runway, labor compliance & notices."
     },
     {
       role: "Project Manager",
       name: "Arefin Ahmed",
       email: "arefin@nexacore.com",
-      badgeClass: "bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400 border-amber-200 dark:border-amber-800",
+      badgeClass: "bg-amber-50 text-amber-700 border-amber-200",
       description: "PM Command Center, Dhaka Metro & Chaldal Kanban boards, split team chat, room bookings, star reviews & polls."
     },
     {
       role: "Lead Developer",
       name: "Abdullah Al Mamun",
       email: "mamun@nexacore.com",
-      badgeClass: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400 border-blue-200 dark:border-blue-800",
+      badgeClass: "bg-blue-50 text-blue-700 border-blue-200",
       description: "BRAC University geofenced GPS check-in, sprint tickets, project chat, payslips, leaves, loans & diplomas."
     }
   ];
@@ -133,38 +137,33 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-white flex flex-col font-sans transition-colors duration-150">
+    <div className="min-h-screen bg-white text-slate-900 flex flex-col font-sans transition-colors duration-150">
       <Navbar />
 
       <main className="flex-grow pt-20">
         {/* Hero Section */}
-        <section className="py-16 sm:py-24 border-b border-slate-200 dark:border-zinc-900 bg-white dark:bg-zinc-950 text-center">
+        <section className="py-16 sm:py-24 border-b border-slate-100 bg-white text-center">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-300">
-              <Code2 className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-              <span>University Capstone Project &bull; CSE Final Presentation</span>
-            </div>
-
-            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              NexaCore <span className="text-slate-400 dark:text-zinc-600">&bull;</span> Employee Management System
+            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900">
+              NexaCore <span className="text-slate-400">&bull;</span> Employee Management System
             </h1>
 
-            <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
               A full-stack, decoupled enterprise operations and workforce platform built with <strong>Next.js</strong>, <strong>Express TypeScript</strong>, <strong>Prisma ORM</strong>, and <strong>Better-Auth</strong>.
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
               <Link
                 href="/login"
-                className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 text-white font-bold px-6 py-3 rounded-xl text-xs transition-all shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
+                className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-3 rounded-xl text-xs transition-all shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
               >
                 <span>Enter Portal / Login</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <a
                 href="#demo-accounts"
-                className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-200 font-bold px-5 py-3 rounded-xl text-xs transition-all cursor-pointer"
+                className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 font-bold px-5 py-3 rounded-xl text-xs transition-all cursor-pointer"
               >
                 View Test Credentials
               </a>
@@ -174,13 +173,13 @@ export default function Home() {
         </section>
 
         {/* Demo Test Accounts */}
-        <section id="demo-accounts" className="py-16 border-b border-slate-200 dark:border-zinc-900 bg-slate-50/50 dark:bg-zinc-900/30">
+        <section id="demo-accounts" className="py-16 border-b border-slate-100 bg-white">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10 space-y-2">
               <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Presentation Access</span>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Role-Based Test Accounts</h2>
-              <p className="text-xs text-slate-500 dark:text-zinc-400">
-                Universal password for all accounts: <strong className="font-mono bg-slate-200 dark:bg-zinc-800 px-2 py-0.5 rounded text-slate-900 dark:text-white">Password123</strong>
+              <h2 className="text-2xl font-bold text-slate-900">Role-Based Test Accounts</h2>
+              <p className="text-xs text-slate-500">
+                Universal password for all accounts: <strong className="font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-900">Password123</strong>
               </p>
             </div>
 
@@ -188,7 +187,7 @@ export default function Home() {
               {demoAccounts.map((acc, idx) => (
                 <div 
                   key={idx} 
-                  className="bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-slate-200 dark:border-zinc-850 shadow-xs flex flex-col justify-between space-y-4 hover:border-slate-300 dark:hover:border-zinc-700 transition-all"
+                  className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between space-y-4 hover:border-slate-300 hover:shadow-sm transition-all"
                 >
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
@@ -198,14 +197,14 @@ export default function Home() {
                     </div>
 
                     <div>
-                      <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">{acc.name}</h3>
-                      <div className="flex items-center justify-between bg-slate-50 dark:bg-zinc-900 p-2 rounded-xl border border-slate-100 dark:border-zinc-800 mt-1">
-                        <span className="text-xs font-mono font-bold text-slate-600 dark:text-zinc-300 truncate">
+                      <h3 className="text-sm font-extrabold text-slate-900">{acc.name}</h3>
+                      <div className="flex items-center justify-between bg-slate-50 p-2 rounded-xl border border-slate-100 mt-1">
+                        <span className="text-xs font-mono font-bold text-slate-600 truncate">
                           {acc.email}
                         </span>
                         <button
                           onClick={() => handleCopy(acc.email)}
-                          className="p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
+                          className="p-1 text-slate-400 hover:text-slate-900 cursor-pointer"
                           title="Copy email"
                         >
                           {copiedEmail === acc.email ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
@@ -213,14 +212,14 @@ export default function Home() {
                       </div>
                     </div>
 
-                    <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed font-medium">
+                    <p className="text-xs text-slate-500 leading-relaxed font-medium">
                       {acc.description}
                     </p>
                   </div>
 
                   <Link
                     href="/login"
-                    className="w-full text-center py-2 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-900 dark:hover:bg-zinc-850 text-slate-800 dark:text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5"
+                    className="w-full text-center py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5"
                   >
                     <span>Sign In as {acc.role.split(" ")[0]}</span>
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -233,11 +232,11 @@ export default function Home() {
         </section>
 
         {/* Key Functional Modules */}
-        <section className="py-16 border-b border-slate-200 dark:border-zinc-900 bg-white dark:bg-zinc-950">
+        <section className="py-16 border-b border-slate-100 bg-white">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10 space-y-2">
               <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Core Architecture</span>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Key Functional Modules</h2>
+              <h2 className="text-2xl font-bold text-slate-900">Key Functional Modules</h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-left">
@@ -246,13 +245,13 @@ export default function Home() {
                 return (
                   <div 
                     key={idx} 
-                    className="p-5 rounded-2xl border border-slate-200 dark:border-zinc-850 bg-slate-50/50 dark:bg-zinc-900/30 space-y-2.5"
+                    className="p-5 rounded-2xl border border-slate-200 bg-white space-y-2.5 shadow-xs hover:border-slate-300 transition-all"
                   >
-                    <div className="p-2 rounded-xl bg-white dark:bg-zinc-800 text-indigo-600 dark:text-indigo-400 w-fit border border-slate-100 dark:border-zinc-700 shadow-xs">
+                    <div className="p-2 rounded-xl bg-slate-50 text-indigo-600 w-fit border border-slate-100 shadow-xs">
                       <Icon className="h-4 w-4" />
                     </div>
-                    <h3 className="text-xs font-extrabold text-slate-900 dark:text-white">{item.title}</h3>
-                    <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed font-medium">
+                    <h3 className="text-xs font-extrabold text-slate-900">{item.title}</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed font-medium">
                       {item.description}
                     </p>
                   </div>
@@ -264,7 +263,7 @@ export default function Home() {
         </section>
 
         {/* Tech Stack */}
-        <section className="py-14 bg-slate-50/50 dark:bg-zinc-900/20 text-center border-b border-slate-200 dark:border-zinc-900">
+        <section className="py-14 bg-white text-center border-b border-slate-100">
           <div className="max-w-4xl mx-auto px-4">
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-6">
               Implemented Tech Stack
@@ -273,10 +272,10 @@ export default function Home() {
               {techStack.map((tech, idx) => (
                 <div 
                   key={idx}
-                  className="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-xs font-bold text-slate-700 dark:text-zinc-300 shadow-xs flex items-center gap-2"
+                  className="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 shadow-xs flex items-center gap-2"
                 >
                   <span>{tech.name}</span>
-                  <span className="text-[9px] font-black uppercase text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-1.5 py-0.5 rounded">
+                  <span className="text-[9px] font-black uppercase text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">
                     {tech.tag}
                   </span>
                 </div>
@@ -286,19 +285,19 @@ export default function Home() {
         </section>
 
         {/* Database Quick Reset & Seeder Section */}
-        <section className="py-16 bg-white dark:bg-zinc-950 text-center">
+        <section className="py-16 bg-white text-center">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-gradient-to-r from-indigo-950/20 via-purple-950/10 to-zinc-900/40 border border-indigo-500/20 dark:border-indigo-500/30 rounded-3xl p-8 sm:p-10 shadow-lg space-y-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-900/50">
+            <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 sm:p-10 shadow-xs space-y-6">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
                 <Database className="h-3.5 w-3.5" />
                 <span>One-Click Database Management</span>
               </div>
 
               <div className="space-y-2 max-w-2xl mx-auto">
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
                   Reset & Load Bangladeshi Demo Data
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 leading-relaxed font-medium">
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
                   Instantly purge all collections and populate all 16 modules with comprehensive Bangladeshi context data: Dhaka Metro RapidPass API, bKash & Nagad MFS, Chaldal Cold-Chain Logistics, BRAC Microfinance, BRAC University GPS check-ins, BDT payroll, and Provident Fund loans.
                 </p>
               </div>
@@ -307,7 +306,7 @@ export default function Home() {
                 <button
                   onClick={() => setShowConfirmModal(true)}
                   disabled={isResetting}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-2xl text-xs flex items-center gap-2 cursor-pointer shadow-md transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-2xl text-xs flex items-center gap-2 cursor-pointer shadow-sm transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
                 >
                   {isResetting ? (
                     <>
@@ -323,7 +322,7 @@ export default function Home() {
                 </button>
               </div>
 
-              <div className="text-[11px] text-slate-400 dark:text-zinc-500 font-semibold">
+              <div className="text-[11px] text-slate-400 font-semibold">
                 Provisioned Users: <strong>abir@nexacore.com</strong> (HR) &bull; <strong>arefin@nexacore.com</strong> (PM) &bull; <strong>mamun@nexacore.com</strong> (Dev) &bull; Password: <strong>Password123</strong>
               </div>
             </div>
@@ -334,29 +333,29 @@ export default function Home() {
 
       {/* Confirmation Safety Modal */}
       {showConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-900 rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-8 text-left space-y-4 animate-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-zinc-900">
-              <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
-                <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white border border-slate-200 rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-8 text-left space-y-4 animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2 text-rose-600">
+                <div className="p-2 rounded-xl bg-rose-50 border border-rose-200">
                   <AlertTriangle className="h-5 w-5" />
                 </div>
-                <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">Confirm Database Reset</h3>
+                <h3 className="text-sm font-extrabold text-slate-900">Confirm Database Reset</h3>
               </div>
-              <button onClick={() => setShowConfirmModal(false)} className="text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
+              <button onClick={() => setShowConfirmModal(false)} className="text-slate-400 hover:text-slate-900 cursor-pointer">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed font-medium">
+            <p className="text-xs text-slate-600 leading-relaxed font-medium">
               This will completely wipe all current database collections and re-seed the system with fresh Bangladeshi context projects, Kanban tasks, geofenced attendance logs, leaves, BDT payroll, and demo accounts.
             </p>
 
-            <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-zinc-900">
+            <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => setShowConfirmModal(false)}
-                className="bg-slate-100 dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 font-bold py-2 px-4 rounded-xl text-xs cursor-pointer hover:bg-slate-200 dark:hover:bg-zinc-800 transition-colors"
+                className="bg-slate-100 text-slate-600 font-bold py-2 px-4 rounded-xl text-xs cursor-pointer hover:bg-slate-200 transition-colors"
               >
                 Cancel
               </button>
