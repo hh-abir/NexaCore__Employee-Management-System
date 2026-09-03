@@ -250,6 +250,33 @@ export default function DashboardPage() {
     }
   };
 
+  const handleQuickReviewLeave = async (leaveId: string, action: "APPROVED" | "REJECTED") => {
+    try {
+      const endpoint = `${API_BASE_URL}/api/leaves/${leaveId}/${action === "APPROVED" ? "approve" : "reject"}`;
+      const res = await fetch(endpoint, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ comment: `Quick ${action.toLowerCase()} via dashboard console` }),
+        credentials: "include"
+      });
+      const data = await safeJson(res);
+      if (res.ok) {
+        toast.success(`Leave request ${action.toLowerCase()} successfully!`);
+        if (sessionData?.user?.role === "HR") {
+          fetchHRSummary();
+        }
+        if (sessionData?.user?.role === "PROJECT_MANAGER") {
+          fetchPMSummary();
+        }
+      } else {
+        toast.error(data.error || `Failed to review leave request.`);
+      }
+    } catch (err) {
+      console.error("Quick review leave error:", err);
+      toast.error("Internal server error.");
+    }
+  };
+
   const fetchEmployeesList = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/api/hr/employees`, {
@@ -541,27 +568,6 @@ export default function DashboardPage() {
       toast.error("Internal server error.");
     } finally {
       setGeneratingPayslip(false);
-    }
-  };
-
-  const handleQuickReviewLeave = async (id: string, status: "APPROVED" | "REJECTED") => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/leaves/${id}/review`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-        credentials: "include"
-      });
-      if (res.ok) {
-        toast.success(`Leave request ${status.toLowerCase()}!`);
-        if (sessionData?.user.role === "HR") fetchHRSummary();
-        if (sessionData?.user.role === "PROJECT_MANAGER") fetchPMSummary();
-      } else {
-        const data = await safeJson(res);
-        toast.error(data.error || "Failed to update leave.");
-      }
-    } catch (err) {
-      toast.error("Internal server error.");
     }
   };
 
@@ -976,6 +982,63 @@ export default function DashboardPage() {
                     >
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       <span>Review & Settle Payout</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* HR Staff Leave & Remote Work (WFH) Queue */}
+        {pendingLeaves.length > 0 && (
+          <div className="bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-900 rounded-3xl p-6 sm:p-7 shadow-xs space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-50 dark:border-zinc-900 pb-3">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-950 dark:text-white flex items-center gap-2">
+                <FileText className="h-4 w-4 text-amber-500" />
+                <span>Staff Leave & Remote Work (WFH) Approvals Queue ({pendingLeaves.length})</span>
+              </h2>
+              <button
+                onClick={() => router.push("/dashboard/leaves")}
+                className="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline cursor-pointer flex items-center gap-1"
+              >
+                <span>View Full Ledger</span>
+                <ArrowRight className="h-3 w-3" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {pendingLeaves.map((leave: any) => (
+                <div
+                  key={leave.id}
+                  className="p-4 rounded-2xl border border-slate-100 dark:border-zinc-900 bg-slate-50/50 dark:bg-zinc-900/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-extrabold text-xs text-slate-900 dark:text-white">{leave.user?.name}</span>
+                      <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                        leave.type === "WFH" ? "bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400" : "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400"
+                      }`}>
+                        {leave.type}
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-400 mt-0.5">
+                      {new Date(leave.startDate).toLocaleDateString()} &rarr; {new Date(leave.endDate).toLocaleDateString()} &bull; Reason: "{leave.reason}"
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => handleQuickReviewLeave(leave.id, "APPROVED")}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1 px-3 rounded-lg text-xs cursor-pointer transition-colors"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => handleQuickReviewLeave(leave.id, "REJECTED")}
+                      className="bg-slate-200 dark:bg-zinc-800 hover:bg-rose-600 hover:text-white text-slate-700 dark:text-zinc-300 font-bold py-1 px-3 rounded-lg text-xs cursor-pointer transition-colors"
+                    >
+                      Reject
                     </button>
                   </div>
                 </div>

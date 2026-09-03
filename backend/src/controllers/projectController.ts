@@ -618,14 +618,19 @@ export const getPMSummary = async (req: AuthenticatedRequest, res: Response) => 
     // All distinct team members
     const teamMemberMap = new Map();
     projects.forEach(p => {
-      p.employees.forEach(e => {
+      p.employees?.forEach(e => {
         teamMemberMap.set(e.id, e);
+      });
+      (p as any).employeeIds?.forEach((id: string) => {
+        if (!teamMemberMap.has(id.toString())) {
+          teamMemberMap.set(id.toString(), { id: id.toString() });
+        }
       });
     });
     const teamMemberIds = Array.from(teamMemberMap.keys());
 
     // Aggregate tasks
-    const allTasks = projects.flatMap(p => p.tasks);
+    const allTasks = projects.flatMap(p => p.tasks || []);
     const todoTasks = allTasks.filter(t => t.column === "TODO").length;
     const inProgressTasks = allTasks.filter(t => t.column === "IN_PROGRESS").length;
     const testingTasks = allTasks.filter(t => t.column === "TESTING").length;
@@ -633,12 +638,14 @@ export const getPMSummary = async (req: AuthenticatedRequest, res: Response) => 
 
     // Team pending leave requests
     const pendingTeamLeaves = await prisma.leaveRequest.findMany({
-      where: {
-        userId: { in: teamMemberIds },
-        status: "PENDING"
-      },
+      where: req.user!.role === "HR" 
+        ? { status: "PENDING" } 
+        : {
+            userId: { in: teamMemberIds },
+            status: "PENDING"
+          },
       include: {
-        user: { select: { id: true, name: true, email: true } }
+        user: { select: { id: true, name: true, email: true, role: true } }
       },
       orderBy: { createdAt: "desc" }
     });

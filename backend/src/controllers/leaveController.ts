@@ -104,19 +104,23 @@ export const getPendingRequests = async (req: AuthenticatedRequest, res: Respons
         }
       });
     } else if (req.user!.role === "PROJECT_MANAGER") {
-      // PMs can view pending requests for employees assigned to their projects
+      // PMs can view pending requests for employees assigned to their projects + own
       const managedProjects = await prisma.project.findMany({
         where: {
           managerId: req.user!.id
         },
-        select: {
-          employeeIds: true
+        include: {
+          employees: { select: { id: true } }
         }
       });
 
       // Flatten and extract unique employee IDs
       const employeeIds = Array.from(
-        new Set(managedProjects.flatMap(p => p.employeeIds))
+        new Set([
+          ...managedProjects.flatMap(p => p.employees?.map(e => e.id) || []),
+          ...managedProjects.flatMap(p => p.employeeIds || []),
+          req.user!.id
+        ])
       );
 
       requests = await prisma.leaveRequest.findMany({
@@ -129,6 +133,14 @@ export const getPendingRequests = async (req: AuthenticatedRequest, res: Respons
         },
         include: {
           user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true
+            }
+          },
+          approver: {
             select: {
               id: true,
               name: true,
@@ -292,7 +304,7 @@ export const getAllLeaveRequests = async (req: AuthenticatedRequest, res: Respon
               role: true
             }
           },
-          reviewer: {
+          approver: {
             select: {
               id: true,
               name: true,
@@ -308,13 +320,17 @@ export const getAllLeaveRequests = async (req: AuthenticatedRequest, res: Respon
         where: {
           managerId: req.user!.id
         },
-        select: {
-          employeeIds: true
+        include: {
+          employees: { select: { id: true } }
         }
       });
 
       const employeeIds = Array.from(
-        new Set([...managedProjects.flatMap(p => p.employeeIds), req.user!.id])
+        new Set([
+          ...managedProjects.flatMap(p => p.employees?.map(e => e.id) || []),
+          ...managedProjects.flatMap(p => p.employeeIds || []),
+          req.user!.id
+        ])
       );
 
       requests = await prisma.leaveRequest.findMany({
@@ -333,7 +349,7 @@ export const getAllLeaveRequests = async (req: AuthenticatedRequest, res: Respon
               role: true
             }
           },
-          reviewer: {
+          approver: {
             select: {
               id: true,
               name: true,

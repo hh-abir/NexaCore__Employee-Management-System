@@ -19,7 +19,8 @@ import {
   XCircle,
   Laptop,
   Palmtree,
-  Trash2
+  Trash2,
+  RotateCw
 } from "lucide-react";
 import { useToast } from "@/components/Toast";
 
@@ -336,7 +337,7 @@ export default function LeavesPage() {
       {/* ======================================================== */}
       {/* REVIEWER ALL COMPANY REQUESTS TABLE (Filters & Search)   */}
       {/* ======================================================== */}
-      {isReviewer ? (
+      {isReviewer && (
         <div className="space-y-4">
           {/* Filter Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-zinc-950 p-4 rounded-2xl border border-slate-100 dark:border-zinc-900 shadow-xs">
@@ -423,10 +424,23 @@ export default function LeavesPage() {
 
           {/* Table */}
           <div className="bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-900 rounded-2xl p-6 shadow-xs space-y-4">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-950 dark:text-white flex items-center gap-1.5 border-b border-slate-50 dark:border-zinc-900 pb-3">
-              <FileText className="h-4 w-4 text-indigo-500" />
-              <span>{isHr ? "Company-Wide Leave & Remote Requests" : "Team Leave & Remote Requests"}</span>
-            </h2>
+            <div className="flex justify-between items-center border-b border-slate-50 dark:border-zinc-900 pb-3">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-950 dark:text-white flex items-center gap-1.5">
+                <FileText className="h-4 w-4 text-indigo-500" />
+                <span>{isHr ? "Company-Wide Leave & Remote Requests" : "Team Leave & Remote Requests"}</span>
+              </h2>
+              <button
+                onClick={() => {
+                  fetchAllRequests();
+                  fetchMyRequests();
+                }}
+                disabled={loadingAllRequests}
+                className="text-slate-400 hover:text-slate-900 dark:hover:text-white p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-colors cursor-pointer disabled:opacity-50"
+                title="Refresh Ledger"
+              >
+                <RotateCw className={`h-3.5 w-3.5 ${loadingAllRequests ? "animate-spin text-indigo-500" : ""}`} />
+              </button>
+            </div>
 
             {loadingAllRequests ? (
               <div className="py-8 text-center text-slate-400 text-xs font-bold">Loading leave applications...</div>
@@ -547,15 +561,16 @@ export default function LeavesPage() {
             )}
           </div>
         </div>
-      ) : (
-        /* ======================================================== */
-        /* EMPLOYEE PERSONAL REQUESTS VIEW                          */
-        /* ======================================================== */
-        <div className="bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-900 rounded-2xl p-6 shadow-xs space-y-4">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-950 dark:text-white flex items-center gap-1.5 border-b border-slate-50 dark:border-zinc-900 pb-3">
-            <FileText className="h-4 w-4 text-slate-400" />
-            My Leave & WFH History
-          </h2>
+      )}
+
+      {/* ======================================================== */}
+      {/* EMPLOYEE PERSONAL REQUESTS VIEW                          */}
+      {/* ======================================================== */}
+      <div className="bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-900 rounded-2xl p-6 shadow-xs space-y-4">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-950 dark:text-white flex items-center gap-1.5 border-b border-slate-50 dark:border-zinc-900 pb-3">
+          <FileText className="h-4 w-4 text-slate-400" />
+          My Personal Leave & WFH History
+        </h2>
 
           {loadingMyRequests ? (
             <div className="py-8 text-center text-slate-400 text-xs font-bold">Loading your applications...</div>
@@ -638,7 +653,6 @@ export default function LeavesPage() {
             </div>
           )}
         </div>
-      )}
 
       {/* ======================================================== */}
       {/* MODAL: SUBMIT LEAVE / WFH APPLICATION                    */}
