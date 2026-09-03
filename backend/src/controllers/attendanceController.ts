@@ -216,7 +216,6 @@ export const getAttendanceHistory = async (req: AuthenticatedRequest, res: Respo
             }
           }
         }
-      });
     }
 
     return res.status(200).json({ history });
@@ -225,3 +224,75 @@ export const getAttendanceHistory = async (req: AuthenticatedRequest, res: Respo
     return res.status(500).json({ error: "Internal server error." });
   }
 };
+
+export const createManualAttendance = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { userId, date, clockIn, clockOut, isLate, hoursWorked } = req.body;
+
+    if (!userId || !date || !clockIn) {
+      return res.status(400).json({ error: "Employee, date, and clock-in time are required." });
+    }
+
+    const start = new Date(clockIn);
+    let end = clockOut ? new Date(clockOut) : null;
+    let computedHours = hoursWorked;
+
+    if (end && !computedHours) {
+      const diffMs = end.getTime() - start.getTime();
+      computedHours = Math.round((diffMs / (1000 * 60 * 60)) * 100) / 100;
+    }
+
+    const record = await prisma.attendance.upsert({
+      where: {
+        userId_date: {
+          userId,
+          date
+        }
+      },
+      update: {
+        clockIn: start,
+        clockOut: end,
+        isLate: Boolean(isLate),
+        hoursWorked: computedHours || 0
+      },
+      create: {
+        userId,
+        date,
+        clockIn: start,
+        clockOut: end,
+        isLate: Boolean(isLate),
+        hoursWorked: computedHours || 0
+      },
+      include: {
+        user: { select: { id: true, name: true, email: true, role: true } }
+      }
+    });
+
+    await createNotification(
+      userId,
+      "Attendance Recorded by HR",
+      `HR Administrator has logged attendance for ${date} (${start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${end ? end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "In Progress"}).`,
+      "ATTENDANCE",
+      "/dashboard/attendance"
+    );
+
+    return res.status(200).json({ message: "Attendance record saved.", attendance: record });
+  } catch (err) {
+    console.error("Manual Attendance Error:", err);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+export const deleteAttendanceRecord = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    await prisma.attendance.delete({
+      where: { id }
+    });
+    return res.status(200).json({ message: "Attendance record deleted successfully." });
+  } catch (err) {
+    console.error("Delete Attendance Error:", err);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
+
