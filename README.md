@@ -1,31 +1,66 @@
 # NexaCore — Employee Management System
 
-NexaCore is a premium, clean minimalist SaaS portal designed for unified company operations, project resource tracking, and automated monthly payroll generation. Built with a developer-first design language mimicking the Shadcn UI template, the application balances sleek visuals with functional, role-based workflows for HR Administrators, Project Managers, and Employees.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-Express-green?logo=node.js)](https://nodejs.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-MongoDB-teal?logo=prisma)](https://www.prisma.io/)
 
+A full-stack, decoupled enterprise operations and workforce platform built with **Next.js**, **Express TypeScript**, **Prisma ORM**, and **Better-Auth**.
 
-## 🚀 Key Features
+---
 
-*   **Role-Based Access Control (RBAC):** Strict interface adaptation and endpoint route security depending on session roles (`HR`, `PROJECT_MANAGER`, `EMPLOYEE`).
-*   **Minimalist Dashboard Grids:** High-fidelity analytics dashboards featuring transaction counts, monthly vertical updates charts, and custom SVG area curve graphs.
-*   **Employee Onboarding:** Portal for HR administrators to provision default credentials and database records for new staff members.
-*   **Session Auth Integration:** Integrated security using Better Auth with cookie session verification.
+## ⚡ Features
 
+- **Role-Based Access Control (RBAC):** Tailored interfaces and API permissions for `HR`, `PROJECT_MANAGER`, and `EMPLOYEE`.
+- **Geofenced Campus Attendance:** Real-time Haversine GPS check-in & clock-out validation against campus coordinates.
+- **Sprint Kanban & Team Chat:** Multi-stage drag-and-drop task boards with Markdown details and channel messaging.
+- **BDT Payroll & Payslips:** Automated monthly gross-to-net salary calculations, deductions, bonuses, and PDF payslips.
+- **Leave & WFH Management:** Dual-ledger request workflows with reviewer approval queues.
+- **Centralized Knowledge Base:** Resource hub for company policies, coding standards, and onboarding roadmaps.
+- **Cryptographic Certificates:** Verifiable digital diplomas issued upon project settlement.
+- **Enterprise Utilities:** Meeting room bookings, employee loan ledger, star evaluations, retreat polls, and grievance reporting.
 
-## 🛠️ Tech Stack
+---
 
-### Frontend (Next.js Client)
-*   **Framework:** Next.js (App Router)
-*   **Styling:** Tailwind CSS (v4)
-*   **Typography:** Inter (Google Fonts)
-*   **Icons:** Lucide React
-*   **Authentication Client:** Better Auth React SDK
+## 🔑 Demo Accounts
 
-### Backend (Express.js API)
-*   **Framework:** Express.js (TypeScript)
-*   **Database Client:** Prisma (MongoDB)
-*   **Authentication Server:** Better Auth
-*   **Validation:** Zod Schema Payloads
-*   **Pattern:** Model-View-Controller (MVC) Structure
+Universal Password for all demo accounts: `Password123`
+
+| Role | Name | Email |
+| :--- | :--- | :--- |
+| **HR Administrator** | Abir Hasan | `abir@nexacore.com` |
+| **Project Manager** | Arefin Ahmed | `arefin@nexacore.com` |
+| **Lead Developer** | Abdullah Al Mamun | `mamun@nexacore.com` |
+
+---
+
+## 🚀 Quick Start
+
+### 1. Backend Setup
+
+```bash
+cd backend
+npm install
+npx prisma generate
+
+# Reset and seed database with Bangladeshi context demo data
+npx tsx reset-and-seed-db.ts
+
+# Start development API server (Port 5000)
+npm run dev
+```
+
+### 2. Frontend Setup
+
+```bash
+cd frontend
+npm install
+
+# Start Next.js development client (Port 3000)
+npm run dev
+```
+
+Visit `http://localhost:3000` in your browser.
 
 ---
 
@@ -33,72 +68,25 @@ NexaCore is a premium, clean minimalist SaaS portal designed for unified company
 
 ```bash
 NexaCore/
-├── frontend/               # Next.js Client Application
-│   ├── app/                # App Router Pages & Routes
-│   │   ├── (dashboard)/    # Dashboard layout & sub-pages
-│   │   ├── login/          # Clean login page
-│   │   └── page.tsx        # Homepage landing page
-│   ├── components/         # Shared UI components (Sidebar, Header, Navbar)
-│   ├── public/             # Branding assets (logo, icons)
-│   └── package.json        # Frontend dependencies
+├── backend/                # Express TypeScript REST API
+│   ├── prisma/             # Prisma schema & MongoDB models
+│   ├── src/
+│   │   ├── controllers/    # API endpoint controllers
+│   │   ├── middlewares/    # RBAC & authentication guards
+│   │   ├── routes/         # Express route handlers
+│   │   └── services/       # Database seed and background services
+│   └── reset-and-seed-db.ts# Database reset & seed script
 │
-└── backend/                # Express.js REST API
-    ├── prisma/             # Prisma Client & MongoDB Schema
-    ├── src/
-    │   ├── config/         # Database clients & auth configurations
-    │   ├── controllers/    # Request handlers & logic
-    │   ├── middlewares/    # Session checks & role verification
-    │   ├── routes/         # REST endpoints maps
-    │   ├── validators/     # Zod payload structures
-    │   └── app.ts          # Server entrypoint
-    ├── .env.example        # Environment variables template
-    └── package.json        # Backend dependencies
+└── frontend/               # Next.js App Router Client
+    ├── app/                # App router pages & layouts
+    │   ├── (dashboard)/    # Role-based dashboard modules
+    │   ├── login/          # Minimal light-mode login portal
+    │   └── page.tsx        # Homepage with 1-click database seeder
+    └── components/         # Reusable UI components & modals
 ```
 
 ---
 
-## ⚙️ Getting Started
+## 📄 License
 
-### Prerequisites
-*   Node.js (v18+)
-*   MongoDB (Atlas Cluster or Local Instance)
-
-### 1. Setup Backend API
-Navigate to the backend folder, configure environment variables, and start the server:
-
-```bash
-# Navigate to backend
-cd backend
-
-# Copy environment template
-copy .env.example .env
-
-# Install dependencies
-npm install
-
-# Generate Prisma DB client
-npx prisma generate
-
-# Start the Express server
-npm run dev
-```
-*Note: Make sure to configure the `DATABASE_URL` cluster connection string inside your `.env` file.*
-
-### 2. Setup Frontend Client
-Open a new terminal window, navigate to the frontend folder, and launch the dev client:
-
-```bash
-# Navigate to frontend
-cd frontend
-
-# Install pruned dependencies
-npm install
-
-# Start Next.js client
-npm run dev
-```
-Open `http://localhost:3000` in your browser to view the NexaCore landing page. You can navigate to `/login` to access the SSO portal.
-
----
-
-
+This project is licensed under the [MIT License](LICENSE).
