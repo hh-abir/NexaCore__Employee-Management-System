@@ -11,7 +11,10 @@ import {
   Lock,
   Sparkles,
   ArrowRight,
-  ShieldCheck
+  ShieldCheck,
+  MapPin,
+  Layers,
+  DollarSign
 } from "lucide-react";
 
 function LoginForm() {
@@ -180,67 +183,77 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen grid lg:grid-cols-12 bg-white font-sans antialiased">
       
-      {/* Left Section: Minimal Visual Showcase with Office Image */}
-      <div className="hidden lg:col-span-7 lg:flex flex-col justify-between p-12 bg-slate-50 relative border-r border-slate-200 overflow-hidden">
+      {/* Left Section: Full-Bleed Office Background with Text Overlay */}
+      <div className="hidden lg:col-span-7 lg:flex relative flex-col justify-between p-12 overflow-hidden bg-slate-950 text-white">
         
+        {/* Full-Bleed Background Image */}
+        <img 
+          src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=85" 
+          alt="People working in modern office in front of desk computers" 
+          className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
+        />
+
+        {/* High-Contrast Gradient Backdrop Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-slate-950/75 backdrop-blur-[0.5px]" />
+
         {/* Top Header */}
-        <div className="relative flex justify-between items-center z-10">
+        <div className="relative z-10 flex justify-between items-center">
           <Link href="/" className="flex items-center gap-3">
-            <img src="/logo.jpg" alt="NexaCore" className="w-9 h-9 rounded-xl object-cover border border-slate-200 shadow-xs" />
+            <img src="/logo.jpg" alt="NexaCore" className="w-9 h-9 rounded-xl object-cover border border-white/20 shadow-sm" />
             <div className="flex items-center gap-2">
-              <span className="text-lg font-black tracking-tight text-slate-900">
+              <span className="text-lg font-black tracking-tight text-white">
                 NexaCore
               </span>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300 bg-white/10 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/20">
                 EMS
               </span>
             </div>
           </Link>
 
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-700 select-none shadow-xs">
-            <ShieldCheck className="h-4 w-4 text-emerald-600" />
-            <span>Enterprise Portal</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold text-white select-none shadow-xs">
+            <ShieldCheck className="h-4 w-4 text-emerald-400" />
+            <span>Role-Based Access Control</span>
           </div>
         </div>
 
-        {/* Center Minimal Showcase */}
-        <div className="relative max-w-lg space-y-6 my-auto z-10">
-          
-          <div className="space-y-2">
-            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 leading-snug">
-              Smart operations for high-velocity teams.
+        {/* Center Overlay Text & Feature Badges */}
+        <div className="relative z-10 max-w-xl space-y-6 my-auto">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-white/15 backdrop-blur-md text-white border border-white/25">
+              <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+              <span>Full-Stack Enterprise Operations</span>
+            </div>
+
+            <h2 className="text-3xl xl:text-4xl font-extrabold tracking-tight text-white leading-tight">
+              Empowering Teams. Accelerating Agile Delivery.
             </h2>
-            <p className="text-slate-500 text-xs sm:text-sm leading-relaxed font-medium">
-              A unified environment connecting agile engineering sprints, geofenced GPS attendance, and automated payroll operations.
+
+            <p className="text-slate-200 text-xs sm:text-sm leading-relaxed font-medium">
+              A unified environment connecting GPS-verified campus attendance, agile Markdown Kanban sprints, and automated BDT payroll operations.
             </p>
           </div>
 
-          {/* Office Image Card */}
-          <div className="relative rounded-2xl overflow-hidden border border-slate-200 shadow-sm group">
-            <img 
-              src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1000&q=80" 
-              alt="Modern Collaborative Office Workspace" 
-              className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent flex items-end p-5">
-              <div className="text-white space-y-1">
-                <div className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border border-white/30">
-                  <Sparkles className="h-3 w-3 text-amber-300" />
-                  <span>NexaCore Ecosystem</span>
-                </div>
-                <p className="text-xs font-semibold text-slate-100">
-                  Connected workspaces for engineers, project managers, and HR leaders.
-                </p>
-              </div>
+          {/* Quick Feature Pills */}
+          <div className="flex flex-wrap gap-2 pt-1">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/40 backdrop-blur-md border border-white/15 text-xs text-slate-200 font-medium">
+              <MapPin className="h-3.5 w-3.5 text-indigo-400" />
+              <span>BRAC University GPS Check-In</span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/40 backdrop-blur-md border border-white/15 text-xs text-slate-200 font-medium">
+              <Layers className="h-3.5 w-3.5 text-purple-400" />
+              <span>Markdown Sprint Kanban</span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/40 backdrop-blur-md border border-white/15 text-xs text-slate-200 font-medium">
+              <DollarSign className="h-3.5 w-3.5 text-emerald-400" />
+              <span>BDT Payroll & Payslips</span>
             </div>
           </div>
-
         </div>
 
         {/* Bottom Footer Meta */}
-        <div className="relative text-[11px] text-slate-400 font-medium flex justify-between items-center z-10">
+        <div className="relative z-10 text-[11px] text-slate-400 font-medium flex justify-between items-center">
           <span>&copy; 2026 NexaCore Employee Management System</span>
-          <span>Role-Based Access Control</span>
+          <span>Next.js 16 &bull; Express TypeScript &bull; MongoDB</span>
         </div>
       </div>
 
