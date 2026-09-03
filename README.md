@@ -101,11 +101,4 @@ Open `http://localhost:3000` in your browser to view the NexaCore landing page. 
 
 ---
 
-## 🔒 Session Verification & Routes
 
-The Express backend secures endpoints using cookie-based session verification and middleware checks:
-*   `roleGuard(["HR"])` secures onboarding and profile adjustments.
-*   `roleGuard(["HR", "PROJECT_MANAGER"])` secures appraisals and leave requests.
-*   Authentication states map dynamically to client views using the `useSession()` hook.
-
----
