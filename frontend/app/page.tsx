@@ -21,13 +21,20 @@ import {
   Copy,
   Check,
   Sparkles,
-  Server
+  Server,
+  RotateCw,
+  AlertTriangle,
+  X
 } from "lucide-react";
 import { useToast } from "@/components/Toast";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function Home() {
   const { toast } = useToast();
   const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
+  const [isResetting, setIsResetting] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const handleCopy = (email: string) => {
     navigator.clipboard.writeText(email);
@@ -36,27 +43,50 @@ export default function Home() {
     setTimeout(() => setCopiedEmail(null), 2000);
   };
 
+  const handleResetAndSeed = async () => {
+    setIsResetting(true);
+    setShowConfirmModal(false);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/seed/reset-and-seed`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+
+      if (res.ok) {
+        toast.success("Database cleanly purged and re-seeded with Bangladeshi enterprise data!");
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || "Failed to reset and seed database.");
+      }
+    } catch (err) {
+      console.error("Seed error:", err);
+      toast.error("Could not reach backend API server. Make sure it is running.");
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   const demoAccounts = [
     {
       role: "HR Administrator",
-      name: "Jane Doe",
-      email: "hr@worksync.com",
+      name: "Abir Hasan",
+      email: "abir@nexacore.com",
       badgeClass: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
-      description: "Employee onboarding, OpEx finances, BI analytics, payroll generation, grievances & surveys."
+      description: "Employee registration & Drive docs, BDT payroll, financial settlements, OpEx runway, labor compliance & notices."
     },
     {
       role: "Project Manager",
-      name: "Asif Iqbal",
-      email: "asif.iqbal@nexacore.com",
+      name: "Arefin Ahmed",
+      email: "arefin@nexacore.com",
       badgeClass: "bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400 border-amber-200 dark:border-amber-800",
-      description: "PM Command Center, Markdown Kanban sprints, room bookings, star appraisals & sprint polls."
+      description: "PM Command Center, Dhaka Metro & Chaldal Kanban boards, split team chat, room bookings, star reviews & polls."
     },
     {
-      role: "Software Engineer",
-      name: "Abir Hasan",
-      email: "abir.hasan@nexacore.com",
+      role: "Lead Developer",
+      name: "Abdullah Al Mamun",
+      email: "mamun@nexacore.com",
       badgeClass: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400 border-blue-200 dark:border-blue-800",
-      description: "Geofenced campus check-in, sprint tickets, project chat, payslips, leaves, loans & certificates."
+      description: "BRAC University geofenced GPS check-in, sprint tickets, project chat, payslips, leaves, loans & diplomas."
     }
   ];
 
@@ -88,7 +118,7 @@ export default function Home() {
     },
     {
       title: "Slack-Style Project Chat",
-      description: "Real-time communication channels (#general, #technical, #announcements) scoped to assigned team members.",
+      description: "Real-time communication channels (#general, #sprint-updates, #deployments) scoped to assigned team members.",
       icon: Users
     }
   ];
@@ -98,13 +128,12 @@ export default function Home() {
     { name: "Node.js & Express (TypeScript)", tag: "Backend API" },
     { name: "Prisma ORM & MongoDB Atlas", tag: "Database" },
     { name: "Better-Auth (RBAC)", tag: "Authentication" },
-    { name: "Tailwind CSS v4 & Lucide", tag: "Styling" },
-    { name: "Chart.js & react-chartjs-2", tag: "Analytics" }
+    { name: "Tailwind CSS v4", tag: "Styling" },
+    { name: "Lucide Icons", tag: "Assets" }
   ];
 
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-white transition-colors duration-150">
-      
+    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-white flex flex-col font-sans transition-colors duration-150">
       <Navbar />
 
       <main className="flex-grow pt-20">
@@ -159,7 +188,7 @@ export default function Home() {
               {demoAccounts.map((acc, idx) => (
                 <div 
                   key={idx} 
-                  className="bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-slate-200 dark:border-zinc-850 shadow-xs flex flex-col justify-between space-y-4"
+                  className="bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-slate-200 dark:border-zinc-850 shadow-xs flex flex-col justify-between space-y-4 hover:border-slate-300 dark:hover:border-zinc-700 transition-all"
                 >
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
@@ -235,7 +264,7 @@ export default function Home() {
         </section>
 
         {/* Tech Stack */}
-        <section className="py-14 bg-slate-50/50 dark:bg-zinc-900/20 text-center">
+        <section className="py-14 bg-slate-50/50 dark:bg-zinc-900/20 text-center border-b border-slate-200 dark:border-zinc-900">
           <div className="max-w-4xl mx-auto px-4">
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-6">
               Implemented Tech Stack
@@ -256,7 +285,93 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Database Quick Reset & Seeder Section */}
+        <section className="py-16 bg-white dark:bg-zinc-950 text-center">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-gradient-to-r from-indigo-950/20 via-purple-950/10 to-zinc-900/40 border border-indigo-500/20 dark:border-indigo-500/30 rounded-3xl p-8 sm:p-10 shadow-lg space-y-6">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-900/50">
+                <Database className="h-3.5 w-3.5" />
+                <span>One-Click Database Management</span>
+              </div>
+
+              <div className="space-y-2 max-w-2xl mx-auto">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+                  Reset & Load Bangladeshi Demo Data
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 leading-relaxed font-medium">
+                  Instantly purge all collections and populate all 16 modules with comprehensive Bangladeshi context data: Dhaka Metro RapidPass API, bKash & Nagad MFS, Chaldal Cold-Chain Logistics, BRAC Microfinance, BRAC University GPS check-ins, BDT payroll, and Provident Fund loans.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+                <button
+                  onClick={() => setShowConfirmModal(true)}
+                  disabled={isResetting}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-2xl text-xs flex items-center gap-2 cursor-pointer shadow-md transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+                >
+                  {isResetting ? (
+                    <>
+                      <RotateCw className="h-4 w-4 animate-spin" />
+                      <span>Purging & Seeding Database...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      <span>Reset Database & Load Bangladeshi Demo Data</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="text-[11px] text-slate-400 dark:text-zinc-500 font-semibold">
+                Provisioned Users: <strong>abir@nexacore.com</strong> (HR) &bull; <strong>arefin@nexacore.com</strong> (PM) &bull; <strong>mamun@nexacore.com</strong> (Dev) &bull; Password: <strong>Password123</strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
       </main>
+
+      {/* Confirmation Safety Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-900 rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-8 text-left space-y-4 animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-zinc-900">
+              <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
+                <div className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40">
+                  <AlertTriangle className="h-5 w-5" />
+                </div>
+                <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">Confirm Database Reset</h3>
+              </div>
+              <button onClick={() => setShowConfirmModal(false)} className="text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed font-medium">
+              This will completely wipe all current database collections and re-seed the system with fresh Bangladeshi context projects, Kanban tasks, geofenced attendance logs, leaves, BDT payroll, and demo accounts.
+            </p>
+
+            <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-zinc-900">
+              <button
+                type="button"
+                onClick={() => setShowConfirmModal(false)}
+                className="bg-slate-100 dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 font-bold py-2 px-4 rounded-xl text-xs cursor-pointer hover:bg-slate-200 dark:hover:bg-zinc-800 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleResetAndSeed}
+                className="bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-5 rounded-xl text-xs flex items-center gap-1.5 cursor-pointer shadow-xs transition-all hover:scale-105 active:scale-95"
+              >
+                <Database className="h-4 w-4" />
+                <span>Confirm & Reset Database</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

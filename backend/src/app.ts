@@ -21,6 +21,7 @@ import certificateRoutes from "./routes/certificateRoutes";
 import analyticsRoutes from "./routes/analyticsRoutes";
 import financeRoutes from "./routes/financeRoutes";
 import knowledgeRoutes from "./routes/knowledgeRoutes";
+import seedRoutes from "./routes/seedRoutes";
 
 dotenv.config();
 
@@ -74,6 +75,7 @@ app.use("/api/certificates", certificateRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/finance", financeRoutes);
 app.use("/api/knowledge", knowledgeRoutes);
+app.use("/api/seed", seedRoutes);
 
 
 app.get("/health", (req, res) => {

@@ -1,4 +1,4 @@
-import { PrismaClient, ExpenseCategory, ExpenseStatus, CertificateType, PollTarget, PollStatus } from "@prisma/client";
+import { PrismaClient, ExpenseCategory, ExpenseStatus, CertificateType, PollTarget, PollStatus, GrievanceCategory, GrievanceStatus, BookingStatus } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -42,7 +42,7 @@ export async function runDatabaseSeed() {
   console.log("[Seeder] Collections purged cleanly.");
 
   // ---------------------------------------------------------
-  // 2. PROVISION USERS (HR, PM, DEVELOPER, TEAM MEMBERS)
+  // 2. PROVISION USERS (HR, PM, DEVELOPER, BANGLADESHI STAFF)
   // ---------------------------------------------------------
   // 2.1 HR Administrator (abir@nexacore.com)
   const hrUser = await prisma.user.create({
@@ -121,16 +121,14 @@ export async function runDatabaseSeed() {
     {
       name: "Nusrat Jahan",
       email: "nusrat.jahan@nexacore.com",
-      role: "EMPLOYEE",
       dept: "Frontend Engineering",
       desig: "Senior Frontend Engineer (React/Next.js)",
       phone: "+880 1611-445566",
-      bio: "Building accessible UI components and design systems."
+      bio: "Building accessible UI components and reactive design systems."
     },
     {
       name: "Farhan Kabir",
       email: "farhan.kabir@nexacore.com",
-      role: "EMPLOYEE",
       dept: "Backend & Systems",
       desig: "Senior Backend Engineer (Node/MongoDB)",
       phone: "+880 1712-556677",
@@ -139,7 +137,6 @@ export async function runDatabaseSeed() {
     {
       name: "Sadia Islam",
       email: "sadia.islam@nexacore.com",
-      role: "EMPLOYEE",
       dept: "Product Design",
       desig: "Lead UI/UX & Product Designer",
       phone: "+880 1513-667788",
@@ -148,7 +145,6 @@ export async function runDatabaseSeed() {
     {
       name: "Tanvir Rahman",
       email: "tanvir.rahman@nexacore.com",
-      role: "EMPLOYEE",
       dept: "DevOps & Infrastructure",
       desig: "DevOps & Site Reliability Engineer",
       phone: "+880 1814-778899",
@@ -157,7 +153,6 @@ export async function runDatabaseSeed() {
     {
       name: "Mehzabin Chowdhury",
       email: "mehzabin.c@nexacore.com",
-      role: "EMPLOYEE",
       dept: "Quality Assurance",
       desig: "Senior QA Automation Engineer",
       phone: "+880 1915-889900",
@@ -172,7 +167,7 @@ export async function runDatabaseSeed() {
         name: staff.name,
         email: staff.email,
         emailVerified: true,
-        role: staff.role as any,
+        role: "EMPLOYEE",
         department: staff.dept,
         designation: staff.desig,
         phone: staff.phone,
@@ -205,12 +200,15 @@ export async function runDatabaseSeed() {
       name: "Dhaka Metro Smart RapidPass Ticketing API",
       description: "High-throughput NFC and QR-based automated fare collection engine with real-time station gate synchronization.",
       status: "ACTIVE",
-      priority: "URGENT",
+      priority: "HIGH",
       budget: 850000,
-      completionBonusRate: 15,
+      payoutBonus: 25000,
       managerId: pmUser.id,
       employeeIds: [devMamun.id, createdStaff[0].id, createdStaff[1].id, createdStaff[3].id],
-      deadline: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000)
+      startDate: new Date("2026-08-01T00:00:00Z"),
+      endDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000),
+      category: "Public Transportation FinTech",
+      client: "Dhaka Mass Transit Company Limited (DMTCL)"
     }
   });
 
@@ -222,10 +220,13 @@ export async function runDatabaseSeed() {
       status: "PENDING_SETTLEMENT",
       priority: "HIGH",
       budget: 650000,
-      completionBonusRate: 12,
+      payoutBonus: 20000,
       managerId: pmUser.id,
       employeeIds: [devMamun.id, createdStaff[1].id, createdStaff[4].id],
-      deadline: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+      startDate: new Date("2026-07-01T00:00:00Z"),
+      endDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      category: "FinTech & MFS",
+      client: "FinTech Alliance Bangladesh"
     }
   });
 
@@ -237,10 +238,13 @@ export async function runDatabaseSeed() {
       status: "ACTIVE",
       priority: "HIGH",
       budget: 520000,
-      completionBonusRate: 10,
+      payoutBonus: 15000,
       managerId: pmUser.id,
       employeeIds: [createdStaff[0].id, createdStaff[2].id, createdStaff[3].id],
-      deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      startDate: new Date("2026-08-15T00:00:00Z"),
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      category: "IoT & Supply Chain",
+      client: "Chaldal Logistics"
     }
   });
 
@@ -252,10 +256,14 @@ export async function runDatabaseSeed() {
       status: "COMPLETED",
       priority: "MEDIUM",
       budget: 780000,
-      completionBonusRate: 10,
+      payoutApproved: true,
+      payoutBonus: 30000,
       managerId: pmUser.id,
       employeeIds: [devMamun.id, createdStaff[0].id, createdStaff[1].id],
-      deadline: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000)
+      startDate: new Date("2026-06-01T00:00:00Z"),
+      endDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+      category: "Microfinance & Social Impact",
+      client: "BRAC International"
     }
   });
 
@@ -267,10 +275,13 @@ export async function runDatabaseSeed() {
       status: "PENDING",
       priority: "HIGH",
       budget: 920000,
-      completionBonusRate: 14,
+      payoutBonus: 28000,
       managerId: pmUser.id,
       employeeIds: [devMamun.id, createdStaff[3].id, createdStaff[4].id],
-      deadline: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000)
+      startDate: new Date("2026-09-01T00:00:00Z"),
+      endDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
+      category: "Telecommunications & AI",
+      client: "VEON / Banglalink"
     }
   });
 
@@ -283,7 +294,6 @@ export async function runDatabaseSeed() {
       title: "Implement NFC RapidPass Tap-and-Go Reader Protocol",
       description: "Integrate ISO 14443 Type A/B smart card interface with sub-100ms response time for station turnstiles.\n\n### Requirements\n- Zero latency buffer\n- Encrypted AES-256 payload handshake\n- Fallback offline ledger sync",
       column: "COMPLETED",
-      priority: "URGENT",
       projectId: metroProject.id,
       assigneeId: devMamun.id
     },
@@ -291,7 +301,6 @@ export async function runDatabaseSeed() {
       title: "Real-Time Station Turnstile WebSocket Gate Daemon",
       description: "Build distributed WebSocket server cluster to broadcast gate open/close events across 16 stations concurrently.",
       column: "IN_PROGRESS",
-      priority: "HIGH",
       projectId: metroProject.id,
       assigneeId: createdStaff[1].id
     },
@@ -299,7 +308,6 @@ export async function runDatabaseSeed() {
       title: "Next.js Commuter Balance & Journey History Dashboard",
       description: "Design reactive user portal for Dhaka metro commuters to top up RapidPass and inspect transaction receipts.",
       column: "TESTING",
-      priority: "MEDIUM",
       projectId: metroProject.id,
       assigneeId: createdStaff[0].id
     },
@@ -307,7 +315,6 @@ export async function runDatabaseSeed() {
       title: "Load Test 50,000 Concurrent Passenger Swipes (k6)",
       description: "Simulate peak rush hour at Motijheel and Uttara North stations with automated stress testing scripts.",
       column: "TODO",
-      priority: "HIGH",
       projectId: metroProject.id,
       assigneeId: createdStaff[3].id
     },
@@ -317,7 +324,6 @@ export async function runDatabaseSeed() {
       title: "IoT Temperature Sensor Telemetry Ingestion Pipeline",
       description: "Subscribe to MQTT topics emitted by chilled delivery vans and trigger alerts if temp exceeds 4°C.",
       column: "IN_PROGRESS",
-      priority: "HIGH",
       projectId: chaldalProject.id,
       assigneeId: createdStaff[0].id
     },
@@ -325,7 +331,6 @@ export async function runDatabaseSeed() {
       title: "Dhaka Traffic Aware Fleet Routing Algorithm",
       description: "Calculate optimal delivery sequences factoring real-time road congestion in Gulshan, Dhanmondi, and Mirpur.",
       column: "COMPLETED",
-      priority: "MEDIUM",
       projectId: chaldalProject.id,
       assigneeId: createdStaff[2].id
     },
@@ -333,7 +338,6 @@ export async function runDatabaseSeed() {
       title: "Automated Dispatch Push Notifications Service",
       description: "Send SMS and mobile push alerts to customers when dispatch vehicle is within 1.5km of delivery address.",
       column: "TODO",
-      priority: "LOW",
       projectId: chaldalProject.id,
       assigneeId: createdStaff[3].id
     }
@@ -344,8 +348,7 @@ export async function runDatabaseSeed() {
       data: {
         title: t.title,
         description: t.description,
-        column: t.column as any,
-        priority: t.priority as any,
+        column: t.column,
         projectId: t.projectId,
         assigneeId: t.assigneeId
       }
@@ -481,7 +484,7 @@ export async function runDatabaseSeed() {
       base: 140000,
       bonus: 25000,
       deductions: 8000,
-      month: "August 2026",
+      month: "2026-08",
       status: "PAID"
     },
     {
@@ -489,7 +492,7 @@ export async function runDatabaseSeed() {
       base: 130000,
       bonus: 20000,
       deductions: 7500,
-      month: "August 2026",
+      month: "2026-08",
       status: "PAID"
     },
     {
@@ -497,7 +500,7 @@ export async function runDatabaseSeed() {
       base: 110000,
       bonus: 15000,
       deductions: 6000,
-      month: "August 2026",
+      month: "2026-08",
       status: "PAID"
     },
     {
@@ -505,7 +508,7 @@ export async function runDatabaseSeed() {
       base: 85000,
       bonus: 10000,
       deductions: 4500,
-      month: "August 2026",
+      month: "2026-08",
       status: "PAID"
     },
     {
@@ -513,7 +516,7 @@ export async function runDatabaseSeed() {
       base: 90000,
       bonus: 12000,
       deductions: 5000,
-      month: "August 2026",
+      month: "2026-08",
       status: "PENDING"
     },
     {
@@ -521,7 +524,7 @@ export async function runDatabaseSeed() {
       base: 75000,
       bonus: 8000,
       deductions: 3500,
-      month: "August 2026",
+      month: "2026-08",
       status: "PENDING"
     }
   ];
@@ -533,11 +536,11 @@ export async function runDatabaseSeed() {
         userId: p.user.id,
         month: p.month,
         baseSalary: p.base,
-        bonuses: p.bonus,
+        bonus: p.bonus,
         deductions: p.deductions,
         netSalary,
-        status: p.status as any,
-        paymentDate: p.status === "PAID" ? new Date("2026-08-31T00:00:00Z") : null
+        status: p.status,
+        paidAt: p.status === "PAID" ? new Date("2026-08-31T00:00:00Z") : null
       }
     });
   }
@@ -549,26 +552,28 @@ export async function runDatabaseSeed() {
     {
       userId: devMamun.id,
       amount: 150000,
-      repaymentMonths: 12,
-      monthlyDeduction: 12500,
+      installments: 12,
+      installmentsPaid: 2,
+      monthlyRepayment: 12500,
       reason: "Apartment advance and moving costs in Dhanmondi.",
       status: "APPROVED",
-      reviewedBy: hrUser.id,
       comment: "Approved under corporate employee welfare fund."
     },
     {
       userId: createdStaff[1].id,
       amount: 80000,
-      repaymentMonths: 8,
-      monthlyDeduction: 10000,
+      installments: 8,
+      installmentsPaid: 0,
+      monthlyRepayment: 10000,
       reason: "Higher education tuition fees for professional certification.",
-      status: "PENDING"
+      status: "PENDING",
+      comment: null
     }
   ];
 
   for (const loan of loans) {
     await prisma.loan.create({
-      data: loan as any
+      data: loan
     });
   }
 
@@ -578,34 +583,18 @@ export async function runDatabaseSeed() {
   await prisma.evaluation.create({
     data: {
       userId: devMamun.id,
-      evaluatorId: pmUser.id,
-      score: 5,
+      pmId: pmUser.id,
       rating: 5,
-      metrics: {
-        technicalQuality: 5,
-        speedOfDelivery: 5,
-        teamCollaboration: 5,
-        initiative: 5
-      },
-      feedback: "Outstanding architecture execution on the Dhaka Metro RapidPass engine. Proactive problem solver with high code standards.",
-      period: "Q3 2026 Sprint Review"
+      feedback: "Outstanding architecture execution on the Dhaka Metro RapidPass engine. Proactive problem solver with high code standards and great team mentorship."
     }
   });
 
   await prisma.evaluation.create({
     data: {
       userId: createdStaff[0].id,
-      evaluatorId: pmUser.id,
-      score: 4,
+      pmId: pmUser.id,
       rating: 4,
-      metrics: {
-        technicalQuality: 4,
-        speedOfDelivery: 4,
-        teamCollaboration: 5,
-        initiative: 4
-      },
-      feedback: "Great work delivering the commuter dashboard with high responsiveness and accessibility standards.",
-      period: "Q3 2026 Sprint Review"
+      feedback: "Great work delivering the commuter dashboard with high responsiveness and accessibility standards."
     }
   });
 
@@ -615,27 +604,30 @@ export async function runDatabaseSeed() {
   const room1 = await prisma.meetingRoom.create({
     data: {
       name: "Sundarbans Executive Boardroom",
+      floor: "Level 11 (East Wing)",
       capacity: 18,
-      location: "Level 11, East Wing",
-      amenities: ["4K Video Conference Screen", "Dual Whiteboard", "Dolby Voice Audio", "High-Speed Fiber HDMI"]
+      amenities: ["4K Video Conference Screen", "Dual Whiteboard", "Dolby Voice Audio", "High-Speed Fiber HDMI"],
+      status: "AVAILABLE"
     }
   });
 
   const room2 = await prisma.meetingRoom.create({
     data: {
       name: "Padma Conference Hall",
+      floor: "Level 11 (West Wing)",
       capacity: 12,
-      location: "Level 11, West Wing",
-      amenities: ["Smart Projector", "Conference Mic", "Whiteboard"]
+      amenities: ["Smart Projector", "Conference Mic", "Whiteboard"],
+      status: "AVAILABLE"
     }
   });
 
   const room3 = await prisma.meetingRoom.create({
     data: {
       name: "Jamuna Agile Huddle Space",
+      floor: "Level 10 (Central Pod)",
       capacity: 6,
-      location: "Level 10, Central Pod",
-      amenities: ["55-inch Standup Screen", "Miro Board Station"]
+      amenities: ["55-inch Standup Screen", "Miro Board Station"],
+      status: "AVAILABLE"
     }
   });
 
@@ -645,8 +637,11 @@ export async function runDatabaseSeed() {
       userId: pmUser.id,
       title: "Dhaka Metro Sprint Planning & Architecture Review",
       description: "Quarterly alignment with engineering leads and QA engineers.",
-      startTime: new Date(Date.now() + 4 * 60 * 60 * 1000),
-      endTime: new Date(Date.now() + 6 * 60 * 60 * 1000)
+      date: "2026-09-04",
+      startTime: "11:00",
+      endTime: "12:30",
+      attendees: 10,
+      status: BookingStatus.APPROVED
     }
   });
 
@@ -656,8 +651,11 @@ export async function runDatabaseSeed() {
       userId: devMamun.id,
       title: "RapidPass Token Security Sync",
       description: "Reviewing token encryption payload with backend team.",
-      startTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      endTime: new Date(Date.now() + 25 * 60 * 60 * 1000)
+      date: "2026-09-05",
+      startTime: "14:00",
+      endTime: "15:00",
+      attendees: 4,
+      status: BookingStatus.PENDING
     }
   });
 
@@ -668,18 +666,39 @@ export async function runDatabaseSeed() {
     data: {
       title: "Annual Engineering Retreat Destination for Winter 2026",
       description: "Vote for your preferred destination for our 3-day company hackathon and annual relaxation retreat.",
-      status: "ACTIVE",
-      targetRole: "ALL",
+      status: PollStatus.ACTIVE,
+      target: PollTarget.COMPANY_WIDE,
       authorId: hrUser.id,
       options: {
         create: [
-          { text: "Sreemangal Tea Gardens & Nature Resort", votesCount: 5 },
-          { text: "Sajek Valley Eco Cottage Over the Clouds", votesCount: 8 },
-          { text: "Cox's Bazar Sea Beach & Oceanfront Resort", votesCount: 4 }
+          { text: "Sreemangal Tea Gardens & Nature Resort" },
+          { text: "Sajek Valley Eco Cottage Over the Clouds" },
+          { text: "Cox's Bazar Sea Beach & Oceanfront Resort" }
         ]
       }
+    },
+    include: {
+      options: true
     }
   });
+
+  // Cast sample votes on poll
+  if (poll1.options.length > 1) {
+    await prisma.pollVote.create({
+      data: {
+        pollId: poll1.id,
+        optionId: poll1.options[1].id,
+        userId: devMamun.id
+      }
+    });
+    await prisma.pollVote.create({
+      data: {
+        pollId: poll1.id,
+        optionId: poll1.options[0].id,
+        userId: pmUser.id
+      }
+    });
+  }
 
   // ---------------------------------------------------------
   // 13. GRIEVANCES & WORKPLACE FEEDBACK
@@ -688,10 +707,10 @@ export async function runDatabaseSeed() {
     data: {
       title: "Flexible Shift Window during Heavy Rain / Waterlogged Dhaka Traffic",
       description: "Requesting a 30-minute grace window for morning check-ins during monsoon season when Mohakhali and Kuril flyovers face extreme traffic.",
-      category: "WORKING_CONDITIONS",
+      category: GrievanceCategory.OTHER,
       userId: devMamun.id,
-      status: "IN_REVIEW",
-      hrComment: "HR is reviewing this with leadership to introduce an automatic rainy-day geofence flex schedule."
+      status: GrievanceStatus.UNDER_INVESTIGATION,
+      resolutionNote: "HR is reviewing this with leadership to introduce an automatic rainy-day geofence flex schedule."
     }
   });
 
@@ -699,10 +718,10 @@ export async function runDatabaseSeed() {
     data: {
       title: "Addition of Healthy Snacks in 10th Floor Cafeteria Pantry",
       description: "Would love to have fresh seasonal fruits (mango, banana) and sugar-free beverage options in the pantry.",
-      category: "FACILITIES",
+      category: GrievanceCategory.OTHER,
       userId: createdStaff[0].id,
-      status: "RESOLVED",
-      hrComment: "Pantry vendor has been updated to deliver fresh fruit crates every Monday & Wednesday."
+      status: GrievanceStatus.RESOLVED,
+      resolutionNote: "Pantry vendor has been updated to deliver fresh fruit crates every Monday & Wednesday."
     }
   });
 
@@ -742,7 +761,7 @@ export async function runDatabaseSeed() {
 
   for (const doc of knowledgeDocs) {
     await prisma.knowledgeDocument.create({
-      data: doc as any
+      data: doc
     });
   }
 
@@ -751,35 +770,31 @@ export async function runDatabaseSeed() {
   // ---------------------------------------------------------
   await prisma.certificate.create({
     data: {
-      certificateNumber: "NEXA-CERT-2026-BRAC-001",
+      certificateCode: "NEXA-CERT-2026-BRAC-001",
       title: "Excellence in Microfinance FinTech Engineering",
-      recipientName: "Abdullah Al Mamun",
-      userId: devMamun.id,
+      recipientId: devMamun.id,
       projectId: bracProject.id,
-      type: "PROJECT_COMPLETION",
+      issuerId: hrUser.id,
+      type: CertificateType.PROJECT_COMPLETION,
+      description: "Issued for exceptional contributions to the BRAC Microfinance Digital Disbursement Portal.",
       issuedAt: new Date("2026-08-25T00:00:00Z"),
-      metadata: {
-        projectName: "BRAC Microfinance Digital Disbursement Portal",
-        role: "Lead Full-Stack Developer",
-        verifiedBy: "Abir Hasan (Head of People & HR Operations)"
-      }
+      pmSignature: "Arefin Ahmed (Technical PM)",
+      hrSignature: "Abir Hasan (Head of People)"
     }
   });
 
   await prisma.certificate.create({
     data: {
-      certificateNumber: "NEXA-CERT-2026-BRAC-002",
+      certificateCode: "NEXA-CERT-2026-BRAC-002",
       title: "Outstanding Technical Project Management",
-      recipientName: "Arefin Ahmed",
-      userId: pmUser.id,
+      recipientId: pmUser.id,
       projectId: bracProject.id,
-      type: "PROJECT_COMPLETION",
+      issuerId: hrUser.id,
+      type: CertificateType.PROJECT_COMPLETION,
+      description: "Issued for exceptional project delivery and agile management on the BRAC Microfinance Portal.",
       issuedAt: new Date("2026-08-25T00:00:00Z"),
-      metadata: {
-        projectName: "BRAC Microfinance Digital Disbursement Portal",
-        role: "Senior Technical Project Manager",
-        verifiedBy: "Abir Hasan (Head of People & HR Operations)"
-      }
+      pmSignature: "Arefin Ahmed (Technical PM)",
+      hrSignature: "Abir Hasan (Head of People)"
     }
   });
 
