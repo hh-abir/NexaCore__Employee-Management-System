@@ -788,9 +788,7 @@ export default function ActiveProjectsPage() {
 
         </div>
       ) : (
-        /* ======================================================== */
-        /* 2. SELECTED WORKSPACE FOCUS (KANBAN & CHAT)             */
-        /* ======================================================== */
+        /* Selected Workspace Focus (Kanban & Chat) */
         <div className="space-y-6">
           
           {/* Top Project Focus Bar */}
@@ -1015,9 +1013,7 @@ export default function ActiveProjectsPage() {
         </div>
       )}
 
-      {/* ======================================================== */}
-      {/* RIGHT-SIDE TASK DETAILS FLYOUT / DRAWER                  */}
-      {/* ======================================================== */}
+      {/* Task Details Drawer */}
       {selectedTask && (
         <div className="fixed inset-0 z-50 flex justify-end bg-zinc-950/40 backdrop-blur-xs animate-in fade-in duration-200">
           <div className="w-full max-w-xl h-full bg-white dark:bg-zinc-950 shadow-2xl flex flex-col justify-between border-l border-slate-200 dark:border-zinc-800 animate-in slide-in-from-right duration-300 overflow-y-auto">
@@ -1259,9 +1255,7 @@ export default function ActiveProjectsPage() {
         </div>
       )}
 
-      {/* ======================================================== */}
-      {/* MODAL: ADD TASK (WITH MARKDOWN TABS)                     */}
-      {/* ======================================================== */}
+      {/* Modal: Add Task */}
       {showAddTask && selectedProject && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/50 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-900 rounded-3xl shadow-xl max-w-lg w-full p-6 text-left space-y-4 animate-in zoom-in-95 duration-200">
@@ -1274,14 +1268,14 @@ export default function ActiveProjectsPage() {
 
             <form onSubmit={handleAddTask} className="space-y-4">
               <div>
-                <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 block mb-1">Task Title *</label>
+                <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 block mb-1">Task Title</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Implement OAuth integration or design database schema"
+                  placeholder="e.g. Implement user login session"
                   value={taskTitle}
                   onChange={(e) => setTaskTitle(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-zinc-950 font-medium"
+                  className="w-full bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-zinc-950 font-medium"
                 />
               </div>
 

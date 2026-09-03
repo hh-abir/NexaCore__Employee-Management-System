@@ -108,10 +108,7 @@ export default function Home() {
       <Navbar />
 
       <main className="flex-grow pt-20">
-        
-        {/* ======================================================== */}
-        {/* MINIMAL HERO SECTION                                     */}
-        {/* ======================================================== */}
+        {/* Hero Section */}
         <section className="py-16 sm:py-24 border-b border-slate-200 dark:border-zinc-900 bg-white dark:bg-zinc-950 text-center">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             
@@ -147,9 +144,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ======================================================== */}
-        {/* DEMO TEST ACCOUNTS                                       */}
-        {/* ======================================================== */}
+        {/* Demo Test Accounts */}
         <section id="demo-accounts" className="py-16 border-b border-slate-200 dark:border-zinc-900 bg-slate-50/50 dark:bg-zinc-900/30">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10 space-y-2">
@@ -208,9 +203,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ======================================================== */}
-        {/* KEY PROJECT MODULES (6 HIGHLIGHTS)                       */}
-        {/* ======================================================== */}
+        {/* Key Functional Modules */}
         <section className="py-16 border-b border-slate-200 dark:border-zinc-900 bg-white dark:bg-zinc-950">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-10 space-y-2">
@@ -241,9 +234,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ======================================================== */}
-        {/* TECHNOLOGY STACK                                         */}
-        {/* ======================================================== */}
+        {/* Tech Stack */}
         <section className="py-14 bg-slate-50/50 dark:bg-zinc-900/20 text-center">
           <div className="max-w-4xl mx-auto px-4">
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-6">
