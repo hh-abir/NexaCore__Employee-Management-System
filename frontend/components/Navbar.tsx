@@ -1,11 +1,39 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { LogOut, LayoutDashboard, LogIn } from "lucide-react";
+import { LogOut, LayoutDashboard, LogIn, Sun, Moon } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
 
 export default function Navbar() {
   const { data: sessionData } = useSession();
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedTheme = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const shouldBeDark = storedTheme === "dark" || (!storedTheme && prefersDark);
+      setIsDark(shouldBeDark);
+      if (shouldBeDark) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const nextDark = !isDark;
+    setIsDark(nextDark);
+    if (nextDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -34,6 +62,19 @@ export default function Navbar() {
 
           {/* Right Action */}
           <div className="flex items-center space-x-3">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              title={isDark ? "Switch to Light Mode" : "Switch to Night Mode"}
+              className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-900"
+            >
+              {isDark ? (
+                <Sun className="h-4.5 w-4.5 text-amber-500 fill-amber-500/20" />
+              ) : (
+                <Moon className="h-4.5 w-4.5" />
+              )}
+            </button>
+
             {sessionData ? (
               <div className="flex items-center gap-3">
                 <Link

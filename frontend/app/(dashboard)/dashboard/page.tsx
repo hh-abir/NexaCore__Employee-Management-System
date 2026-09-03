@@ -30,9 +30,25 @@ import {
   Award,
   ShieldAlert,
   Search,
-  MessageSquare
+  MessageSquare,
+  BookOpen,
+  Trash2,
+  FileCode
 } from "lucide-react";
 import { useToast } from "@/components/Toast";
+
+interface KnowledgeDocument {
+  id: string;
+  title: string;
+  description?: string;
+  category: string;
+  fileUrl: string;
+  createdAt: string;
+  author: {
+    name: string;
+    role: string;
+  };
+}
 
 interface Announcement {
   id: string;
@@ -94,6 +110,21 @@ export default function DashboardPage() {
   const [annTitle, setAnnTitle] = useState("");
   const [annContent, setAnnContent] = useState("");
 
+  // Centralized Knowledge Base states
+  const [boardTab, setBoardTab] = useState<"ANNOUNCEMENTS" | "KNOWLEDGE">("ANNOUNCEMENTS");
+  const [knowledgeDocs, setKnowledgeDocs] = useState<KnowledgeDocument[]>([]);
+  const [loadingKnowledge, setLoadingKnowledge] = useState(false);
+  const [knowledgeCategory, setKnowledgeCategory] = useState("ALL");
+  const [knowledgeSearch, setKnowledgeSearch] = useState("");
+
+  // Post Knowledge Doc Modal (HR)
+  const [showAddKnowledge, setShowAddKnowledge] = useState(false);
+  const [docTitle, setDocTitle] = useState("");
+  const [docDescription, setDocDescription] = useState("");
+  const [docCategory, setDocCategory] = useState("POLICY");
+  const [docFileUrl, setDocFileUrl] = useState("");
+  const [savingDoc, setSavingDoc] = useState(false);
+
   // Attendance state
   const [clockedIn, setClockedIn] = useState(false);
   const [clockedOut, setClockedOut] = useState(false);
@@ -140,6 +171,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (sessionData) {
       fetchAnnouncements();
+      fetchKnowledgeDocs();
       fetchAttendanceStatus();
       if (sessionData.user.role === "HR") {
         fetchHRSummary();
@@ -149,6 +181,12 @@ export default function DashboardPage() {
       }
     }
   }, [sessionData]);
+
+  useEffect(() => {
+    if (sessionData) {
+      fetchKnowledgeDocs();
+    }
+  }, [knowledgeCategory, knowledgeSearch]);
 
   const fetchHRSummary = async () => {
     setLoadingHRData(true);
@@ -270,6 +308,83 @@ export default function DashboardPage() {
     } catch (err) {
       console.error("Error posting announcement:", err);
       toast.error("Internal server error.");
+    }
+  };
+
+  const fetchKnowledgeDocs = async () => {
+    setLoadingKnowledge(true);
+    try {
+      const query = new URLSearchParams();
+      if (knowledgeCategory !== "ALL") query.append("category", knowledgeCategory);
+      if (knowledgeSearch.trim()) query.append("search", knowledgeSearch.trim());
+      const res = await fetch(`${API_BASE_URL}/api/knowledge?${query.toString()}`, {
+        credentials: "include"
+      });
+      if (res.ok) {
+        const data = await safeJson(res);
+        setKnowledgeDocs(data.documents || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch knowledge docs:", err);
+    } finally {
+      setLoadingKnowledge(false);
+    }
+  };
+
+  const handlePostKnowledge = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!docTitle.trim() || !docFileUrl.trim()) {
+      toast.error("Title and Google Drive / PDF Link are required.");
+      return;
+    }
+    setSavingDoc(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/knowledge`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: docTitle,
+          description: docDescription,
+          category: docCategory,
+          fileUrl: docFileUrl
+        }),
+        credentials: "include"
+      });
+      const data = await safeJson(res);
+      if (res.ok) {
+        toast.success("Knowledge base resource published successfully!");
+        setDocTitle("");
+        setDocDescription("");
+        setDocFileUrl("");
+        setShowAddKnowledge(false);
+        fetchKnowledgeDocs();
+      } else {
+        toast.error(data.error || "Failed to publish resource.");
+      }
+    } catch (err) {
+      console.error("Post knowledge error:", err);
+      toast.error("Internal server error.");
+    } finally {
+      setSavingDoc(false);
+    }
+  };
+
+  const handleDeleteKnowledge = async (docId: string) => {
+    if (!confirm("Are you sure you want to remove this resource from the knowledge base?")) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/knowledge/${docId}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+      if (res.ok) {
+        toast.success("Resource removed from knowledge base.");
+        fetchKnowledgeDocs();
+      } else {
+        const data = await safeJson(res);
+        toast.error(data.error || "Failed to remove document.");
+      }
+    } catch (err) {
+      console.error("Delete knowledge error:", err);
     }
   };
 
@@ -776,7 +891,8 @@ export default function DashboardPage() {
       {/* HR EXECUTIVE METRICS OVERVIEW (For HR Role)              */}
       {/* ======================================================== */}
       {isHr && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div className="bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-slate-100 dark:border-zinc-900 shadow-xs space-y-2">
             <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider block">Total Workforce</span>
             <div className="flex justify-between items-end">
@@ -815,6 +931,59 @@ export default function DashboardPage() {
             <div className="text-[10px] text-slate-400 font-semibold">{hrMetrics?.pendingLeavesCount || 0} Leaves &bull; {hrMetrics?.pendingLoansCount || 0} Loans</div>
           </div>
         </div>
+
+        {/* HR Pending Project Settlements Queue */}
+        {pendingSettlements.length > 0 && (
+          <div className="bg-gradient-to-r from-amber-950/40 via-zinc-950 to-zinc-950 border border-amber-500/30 rounded-3xl p-6 sm:p-7 shadow-lg space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  <DollarSign className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-white">
+                    Project Completion & Payout Settlement Queue ({pendingSettlements.length})
+                  </h3>
+                  <p className="text-xs text-amber-200/70 font-medium">
+                    The following workspaces were marked as completed by their Project Managers and await HR financial settlement.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+              {pendingSettlements.map((proj: any) => (
+                <div
+                  key={proj.id}
+                  className="bg-black/40 border border-amber-500/20 rounded-2xl p-4 flex flex-col justify-between space-y-3"
+                >
+                  <div>
+                    <div className="flex justify-between items-start">
+                      <span className="text-xs font-black text-white">{proj.name}</span>
+                      <span className="text-[9px] bg-amber-500/20 text-amber-300 font-extrabold uppercase px-2 py-0.5 rounded-full border border-amber-500/30">
+                        Pending Payout
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-zinc-300 mt-1">
+                      Budget: ${proj.budget?.toLocaleString()} &bull; Lead: {proj.manager?.name} &bull; {proj.employees?.length || 0} Engineers
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-2 border-t border-white/5">
+                    <button
+                      onClick={() => setSettlementProject(proj)}
+                      className="bg-amber-600 hover:bg-amber-700 text-white font-bold py-1.5 px-4 rounded-xl text-xs flex items-center gap-1.5 cursor-pointer shadow-xs transition-all hover:scale-105 active:scale-95"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      <span>Review & Settle Payout</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
       )}
 
       {/* ======================================================== */}
@@ -935,51 +1104,206 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Right 2 Columns: Company Notice Board */}
+        {/* Right 2 Columns: Company Notice Board & Knowledge Base Hub */}
         <div className="lg:col-span-2">
           <div className="bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-900 rounded-3xl p-6 shadow-xs space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-50 dark:border-zinc-900 pb-3">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-950 dark:text-white flex items-center gap-1.5">
-                <Sparkles className="h-4 w-4 text-amber-500" />
-                Company Notice Board & Announcements
-              </h2>
-              {isHr && (
+            
+            {/* Header with Switcher Tabs and HR Action Button */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-50 dark:border-zinc-900 pb-3">
+              
+              <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-zinc-900 p-1 rounded-2xl">
                 <button
-                  onClick={() => setShowAddAnnouncement(true)}
-                  className="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline cursor-pointer flex items-center gap-1"
+                  onClick={() => setBoardTab("ANNOUNCEMENTS")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    boardTab === "ANNOUNCEMENTS"
+                      ? "bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs"
+                      : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                  }`}
                 >
-                  <Plus className="h-3.5 w-3.5" />
-                  <span>Post Notice</span>
+                  <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                  <span>Notice Board</span>
+                  <span className="text-[10px] opacity-70">({announcements.length})</span>
                 </button>
+
+                <button
+                  onClick={() => setBoardTab("KNOWLEDGE")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    boardTab === "KNOWLEDGE"
+                      ? "bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs"
+                      : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                >
+                  <BookOpen className="h-3.5 w-3.5 text-indigo-500" />
+                  <span>Knowledge Base & Docs</span>
+                  <span className="text-[10px] opacity-70">({knowledgeDocs.length})</span>
+                </button>
+              </div>
+
+              {isHr && (
+                boardTab === "ANNOUNCEMENTS" ? (
+                  <button
+                    onClick={() => setShowAddAnnouncement(true)}
+                    className="bg-zinc-950 hover:bg-zinc-900 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 font-bold py-1.5 px-3.5 rounded-xl text-xs flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    <span>Post Notice</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setShowAddKnowledge(true)}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1.5 px-3.5 rounded-xl text-xs flex items-center gap-1.5 cursor-pointer shadow-xs transition-all hover:scale-105 active:scale-95"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    <span>Publish Resource</span>
+                  </button>
+                )
               )}
             </div>
 
-            {loadingAnnouncements ? (
-              <div className="py-8 text-center text-slate-400 text-xs font-bold">Loading notices...</div>
-            ) : announcements.length > 0 ? (
-              <div className="space-y-3 max-h-72 overflow-y-auto">
-                {announcements.map(ann => (
-                  <div key={ann.id} className="p-4 rounded-2xl border border-slate-100 dark:border-zinc-900 bg-slate-50/50 dark:bg-zinc-900/30 space-y-1.5">
-                    <div className="flex justify-between items-start">
-                      <h3 className="text-xs font-extrabold text-slate-900 dark:text-white">{ann.title}</h3>
-                      <span className="text-[10px] text-slate-400 font-semibold">
-                        {new Date(ann.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed font-medium">
-                      {ann.content}
-                    </p>
-                    <div className="text-[9px] text-slate-400 font-bold uppercase pt-1">
-                      Posted by: {ann.author?.name || "HR Admin"}
+            {/* TAB 1: ANNOUNCEMENTS */}
+            {boardTab === "ANNOUNCEMENTS" && (
+              <>
+                {loadingAnnouncements ? (
+                  <div className="py-8 text-center text-slate-400 text-xs font-bold">Loading notices...</div>
+                ) : announcements.length > 0 ? (
+                  <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+                    {announcements.map(ann => (
+                      <div key={ann.id} className="p-4 rounded-2xl border border-slate-100 dark:border-zinc-900 bg-slate-50/50 dark:bg-zinc-900/30 space-y-1.5">
+                        <div className="flex justify-between items-start">
+                          <h3 className="text-xs font-extrabold text-slate-900 dark:text-white">{ann.title}</h3>
+                          <span className="text-[10px] text-slate-400 font-semibold">
+                            {new Date(ann.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed font-medium">
+                          {ann.content}
+                        </p>
+                        <div className="text-[9px] text-slate-400 font-bold uppercase pt-1">
+                          Posted by: {ann.author?.name || "HR Admin"}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-12 text-center text-slate-400 font-bold border-2 border-dashed border-slate-100 dark:border-zinc-900 rounded-2xl">
+                    No active announcements posted.
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* TAB 2: CENTRALIZED KNOWLEDGE BASE & DRIVE DOCS */}
+            {boardTab === "KNOWLEDGE" && (
+              <div className="space-y-3">
+                {/* Search & Category Filter */}
+                <div className="flex flex-col sm:flex-row gap-2 justify-between items-stretch sm:items-center">
+                  <div className="flex items-center gap-1 overflow-x-auto pb-1 text-[10px] font-bold">
+                    {[
+                      { id: "ALL", label: "All Docs" },
+                      { id: "POLICY", label: "Policies" },
+                      { id: "CODING_GUIDELINES", label: "Coding Standards" },
+                      { id: "PROJECT_DOCS", label: "Project Specs" },
+                      { id: "ONBOARDING", label: "Onboarding" }
+                    ].map(cat => (
+                      <button
+                        key={cat.id}
+                        onClick={() => setKnowledgeCategory(cat.id)}
+                        className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer shrink-0 ${
+                          knowledgeCategory === cat.id
+                            ? "bg-indigo-600 text-white shadow-xs"
+                            : "bg-slate-100 dark:bg-zinc-900 text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="relative flex items-center bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl px-2.5 py-1 w-full sm:w-48 shrink-0">
+                    <Search className="h-3 w-3 text-slate-400 mr-1.5 shrink-0" />
+                    <input
+                      type="text"
+                      placeholder="Search docs..."
+                      value={knowledgeSearch}
+                      onChange={(e) => setKnowledgeSearch(e.target.value)}
+                      className="bg-transparent text-[11px] outline-none text-slate-900 dark:text-white w-full font-medium"
+                    />
+                  </div>
+                </div>
+
+                {/* Knowledge Documents List */}
+                {loadingKnowledge ? (
+                  <div className="py-8 text-center text-slate-400 text-xs font-bold">Loading knowledge base...</div>
+                ) : knowledgeDocs.length > 0 ? (
+                  <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+                    {knowledgeDocs.map(doc => (
+                      <div
+                        key={doc.id}
+                        className="p-4 rounded-2xl border border-slate-100 dark:border-zinc-900 bg-slate-50/50 dark:bg-zinc-900/30 flex flex-col justify-between space-y-2.5 hover:border-indigo-500/30 transition-colors"
+                      >
+                        <div>
+                          <div className="flex justify-between items-start gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className="text-xs font-extrabold text-slate-900 dark:text-white">{doc.title}</h3>
+                              <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400">
+                                {doc.category.replace("_", " ")}
+                              </span>
+                            </div>
+
+                            <span className="text-[10px] text-slate-400 font-semibold shrink-0">
+                              {new Date(doc.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+
+                          {doc.description && (
+                            <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed font-medium mt-1">
+                              {doc.description}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex justify-between items-center pt-2 border-t border-slate-200/50 dark:border-zinc-800/60 text-[11px]">
+                          <div className="text-[9px] text-slate-400 font-bold uppercase">
+                            Published by: {doc.author?.name || "HR Admin"}
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            {isHr && (
+                              <button
+                                onClick={() => handleDeleteKnowledge(doc.id)}
+                                className="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
+                                title="Remove Document"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+
+                            <a
+                              href={doc.fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1 rounded-lg border border-indigo-200 dark:border-indigo-500/20 transition-all hover:scale-105"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              <span>Drive Link (PDF / Docs)</span>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-12 text-center text-slate-400 font-bold border-2 border-dashed border-slate-100 dark:border-zinc-900 rounded-2xl space-y-1">
+                    <BookOpen className="h-6 w-6 text-slate-300 dark:text-zinc-700 mx-auto" />
+                    <div>No knowledge base resources found.</div>
+                    <div className="text-[10px] text-slate-400 font-normal">
+                      HR administrators can publish policy documents, coding guidelines, and onboarding drive links.
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="py-12 text-center text-slate-400 font-bold border-2 border-dashed border-slate-100 dark:border-zinc-900 rounded-2xl">
-                No active announcements posted.
+                )}
               </div>
             )}
+
           </div>
         </div>
 
@@ -1033,6 +1357,109 @@ export default function DashboardPage() {
                   className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1.5 px-4 rounded-xl text-xs cursor-pointer shadow-xs"
                 >
                   Broadcast Notice
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL: PUBLISH KNOWLEDGE BASE RESOURCE (HR ONLY)         */}
+      {/* ======================================================== */}
+      {showAddKnowledge && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-900 rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-8 text-left space-y-4 animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-zinc-900">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-900/40">
+                  <BookOpen className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">Publish Knowledge Resource</h3>
+                  <p className="text-[10px] text-slate-400 font-semibold">Central repository for company docs & standards</p>
+                </div>
+              </div>
+              <button onClick={() => setShowAddKnowledge(false)} className="text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handlePostKnowledge} className="space-y-4">
+              <div>
+                <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 block mb-1">
+                  Document / Resource Title
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. NexaCore Employee Handbook, React & Node Coding Standards, Sprint Deliverable Guide"
+                  value={docTitle}
+                  onChange={(e) => setDocTitle(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-indigo-600 font-medium"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 block mb-1">
+                    Resource Category
+                  </label>
+                  <select
+                    value={docCategory}
+                    onChange={(e) => setDocCategory(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-indigo-600 font-bold"
+                  >
+                    <option value="POLICY">Company Policy (HR / Leave / WFH)</option>
+                    <option value="CODING_GUIDELINES">Engineering & Coding Guidelines</option>
+                    <option value="PROJECT_DOCS">Project Specifications & Architecture</option>
+                    <option value="ONBOARDING">New Employee Onboarding Resources</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 block mb-1">
+                    Google Drive Link (PDF / Docs)
+                  </label>
+                  <input
+                    type="url"
+                    required
+                    placeholder="https://drive.google.com/... or PDF URL"
+                    value={docFileUrl}
+                    onChange={(e) => setDocFileUrl(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-indigo-600 font-medium font-mono text-[11px]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 block mb-1">
+                  Summary / Overview Description
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Provide a quick summary or key takeaways for staff members reading this resource..."
+                  value={docDescription}
+                  onChange={(e) => setDocDescription(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-indigo-600 font-medium resize-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-zinc-900">
+                <button
+                  type="button"
+                  onClick={() => setShowAddKnowledge(false)}
+                  className="bg-slate-100 dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 font-bold py-2 px-4 rounded-xl text-xs cursor-pointer hover:bg-slate-200 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingDoc}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-xl text-xs flex items-center gap-1.5 cursor-pointer shadow-xs transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>{savingDoc ? "Publishing..." : "Publish to Knowledge Base"}</span>
                 </button>
               </div>
             </form>
@@ -1124,6 +1551,107 @@ export default function DashboardPage() {
                   className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-4 rounded-xl text-xs cursor-pointer shadow-xs"
                 >
                   {generatingPayslip ? "Issuing..." : "Generate Payslip"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MODAL: HR PROJECT FINANCIAL SETTLEMENT                   */}
+      {/* ======================================================== */}
+      {settlementProject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-900 rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-8 text-left space-y-5 animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-zinc-900">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-900/40">
+                  <DollarSign className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">Project Financial Settlement</h3>
+                  <p className="text-[10px] text-slate-400 font-semibold">{settlementProject.name}</p>
+                </div>
+              </div>
+              <button onClick={() => setSettlementProject(null)} className="text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="p-4 bg-slate-50 dark:bg-zinc-900/60 rounded-2xl border border-slate-100 dark:border-zinc-850 space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-slate-400 font-semibold">Total Approved Budget:</span>
+                <span className="font-extrabold text-slate-900 dark:text-white">${settlementProject.budget?.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400 font-semibold">Project Lead (PM):</span>
+                <span className="font-bold text-slate-900 dark:text-white">{settlementProject.manager?.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400 font-semibold">Allocated Team:</span>
+                <span className="font-bold text-slate-900 dark:text-white">{settlementProject.employees?.length || 1} Engineers</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleSettleProject} className="space-y-4">
+              <div>
+                <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-1">
+                  Team Performance Bonus Pool (% of Budget)
+                </label>
+                <select
+                  value={bonusPercentage}
+                  onChange={(e) => {
+                    setBonusPercentage(e.target.value);
+                    setCustomBonusAmount("");
+                  }}
+                  className="w-full bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-slate-900 dark:text-white outline-none font-bold cursor-pointer"
+                >
+                  <option value="0">0% — No Additional Team Bonus</option>
+                  <option value="5">5% — Standard Delivery Bonus (${((settlementProject.budget * 0.05) / (settlementProject.employees?.length || 1)).toFixed(0)}/member)</option>
+                  <option value="10">10% — Exceptional Milestone Bonus (${((settlementProject.budget * 0.10) / (settlementProject.employees?.length || 1)).toFixed(0)}/member)</option>
+                  <option value="15">15% — High Velocity Sprint Bonus (${((settlementProject.budget * 0.15) / (settlementProject.employees?.length || 1)).toFixed(0)}/member)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-1">
+                  Or Fixed Bonus Amount Per Team Member ($ USD)
+                </label>
+                <input
+                  type="number"
+                  placeholder="e.g. 500"
+                  value={customBonusAmount}
+                  onChange={(e) => setCustomBonusAmount(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-slate-900 dark:text-white outline-none font-mono font-bold"
+                />
+              </div>
+
+              <div className="p-3 bg-emerald-50/60 dark:bg-emerald-950/20 rounded-xl border border-emerald-200/60 dark:border-emerald-900/40 text-[10px] text-emerald-800 dark:text-emerald-300 font-medium">
+                ✓ Approving settlement marks the project as <strong>COMPLETED</strong>, records financial ledger payouts, and automatically issues cryptographic digital achievement certificates to all team members.
+              </div>
+
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-zinc-900">
+                <button
+                  type="button"
+                  onClick={() => setSettlementProject(null)}
+                  className="bg-slate-100 dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 font-bold py-2 px-4 rounded-xl text-xs cursor-pointer hover:bg-slate-200 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={processingSettlement}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-5 rounded-xl text-xs flex items-center gap-1.5 cursor-pointer shadow-md transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+                >
+                  {processingSettlement ? (
+                    <span>Settling & Issuing Certificates...</span>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span>Approve Settlement & Finalize</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

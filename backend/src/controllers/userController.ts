@@ -18,7 +18,7 @@ export const getUserProfile = async (req: AuthenticatedRequest, res: Response) =
         bio: true,
         location: true,
         emergencyContact: true,
-        twoFactorEnabled: true,
+        documentsUrl: true,
         createdAt: true
       }
     });
@@ -36,7 +36,7 @@ export const getUserProfile = async (req: AuthenticatedRequest, res: Response) =
 
 export const updateProfile = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { name, phone, department, designation, bio, location, emergencyContact } = req.body;
+    const { name, phone, department, designation, bio, location, emergencyContact, documentsUrl } = req.body;
 
     const updated = await prisma.user.update({
       where: { id: req.user!.id },
@@ -47,7 +47,8 @@ export const updateProfile = async (req: AuthenticatedRequest, res: Response) =>
         designation: designation !== undefined ? designation.trim() : undefined,
         bio: bio !== undefined ? bio.trim() : undefined,
         location: location !== undefined ? location.trim() : undefined,
-        emergencyContact: emergencyContact !== undefined ? emergencyContact.trim() : undefined
+        emergencyContact: emergencyContact !== undefined ? emergencyContact.trim() : undefined,
+        documentsUrl: documentsUrl !== undefined ? (documentsUrl ? documentsUrl.trim() : null) : undefined,
       },
       select: {
         id: true,
@@ -60,7 +61,7 @@ export const updateProfile = async (req: AuthenticatedRequest, res: Response) =>
         bio: true,
         location: true,
         emergencyContact: true,
-        twoFactorEnabled: true,
+        documentsUrl: true,
         createdAt: true
       }
     });

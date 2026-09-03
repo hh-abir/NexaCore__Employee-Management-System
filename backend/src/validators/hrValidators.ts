@@ -12,6 +12,7 @@ export const onboardEmployeeSchema = z.object({
   designation: z.string().optional(),
   phone: z.string().optional(),
   salary: z.union([z.number(), z.string()]).optional(),
+  documentsUrl: z.string().optional(),
 });
 
 export const validateOnboardEmployee = (req: Request, res: Response, next: NextFunction) => {

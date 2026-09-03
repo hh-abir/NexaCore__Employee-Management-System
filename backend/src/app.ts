@@ -20,6 +20,7 @@ import pollRoutes from "./routes/pollRoutes";
 import certificateRoutes from "./routes/certificateRoutes";
 import analyticsRoutes from "./routes/analyticsRoutes";
 import financeRoutes from "./routes/financeRoutes";
+import knowledgeRoutes from "./routes/knowledgeRoutes";
 
 dotenv.config();
 
@@ -72,6 +73,7 @@ app.use("/api/polls", pollRoutes);
 app.use("/api/certificates", certificateRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/finance", financeRoutes);
+app.use("/api/knowledge", knowledgeRoutes);
 
 
 app.get("/health", (req, res) => {

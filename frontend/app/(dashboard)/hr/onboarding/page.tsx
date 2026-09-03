@@ -21,7 +21,12 @@ import {
   User, 
   Layers, 
   ChevronRight,
-  BadgeCheck
+  BadgeCheck,
+  ExternalLink,
+  FolderGit2,
+  FileText,
+  Code2,
+  Link2
 } from "lucide-react";
 import { useToast } from "@/components/Toast";
 
@@ -33,6 +38,7 @@ interface EmployeeRecord {
   department?: string;
   designation?: string;
   phone?: string;
+  documentsUrl?: string;
   createdAt: string;
 }
 
@@ -64,6 +70,7 @@ export default function HrOnboardingPage() {
   const [designation, setDesignation] = useState("Software Engineer");
   const [phone, setPhone] = useState("");
   const [salary, setSalary] = useState("4500");
+  const [documentsUrl, setDocumentsUrl] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
   const [employees, setEmployees] = useState<EmployeeRecord[]>([]);
@@ -137,7 +144,8 @@ export default function HrOnboardingPage() {
           department,
           designation: designation.trim(),
           phone: phone.trim() || undefined,
-          salary: salary ? parseFloat(salary) : undefined
+          salary: salary ? parseFloat(salary) : undefined,
+          documentsUrl: documentsUrl.trim() || undefined
         }),
         credentials: "include",
       });
@@ -154,6 +162,7 @@ export default function HrOnboardingPage() {
       setName("");
       setEmail("");
       setPhone("");
+      setDocumentsUrl("");
       setPassword("Password123");
       setSalary("4500");
       
@@ -287,7 +296,7 @@ export default function HrOnboardingPage() {
             {/* Step 1: Personal & Account Identity */}
             <div className="space-y-3">
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
-                1. Account Credentials & Role
+                1. Account Credentials & Role Assignment
               </span>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -326,45 +335,123 @@ export default function HrOnboardingPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-1">
-                    Organization Role *
-                  </label>
-                  <select
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white font-bold outline-none cursor-pointer"
+              {/* Explicit Role Cards */}
+              <div>
+                <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-1.5">
+                  Assign Organizational Role *
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRole("EMPLOYEE");
+                      if (department === "Human Resources" || department === "Product") setDepartment("Engineering");
+                      if (designation === "HR Administrator" || designation === "Technical Project Manager") setDesignation("Software Engineer");
+                    }}
+                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
+                      role === "EMPLOYEE"
+                        ? "bg-blue-50/80 dark:bg-blue-950/30 border-blue-500/50 shadow-xs ring-1 ring-blue-500/30"
+                        : "bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 opacity-70"
+                    }`}
                   >
-                    <option value="EMPLOYEE">Software Engineer / Designer / QA (Employee)</option>
-                    <option value="PROJECT_MANAGER">Project Manager (PM)</option>
-                    <option value="HR">HR Administrator</option>
-                  </select>
-                </div>
+                    <div className="flex items-center justify-between">
+                      <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400">
+                        <Code2 className="h-4 w-4" />
+                      </div>
+                      <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">
+                        Developer
+                      </span>
+                    </div>
+                    <div>
+                      <div className="text-xs font-extrabold text-slate-900 dark:text-white">Developer / Engineer</div>
+                      <div className="text-[9px] text-slate-500 dark:text-zinc-400 font-medium leading-tight mt-0.5">
+                        Sprint tasks, Kanban, WFH & attendance
+                      </div>
+                    </div>
+                  </button>
 
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block">
-                      Default Password *
-                    </label>
-                    <button
-                      type="button"
-                      onClick={handleGeneratePassword}
-                      className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-0.5 cursor-pointer"
-                    >
-                      <Sparkles className="h-2.5 w-2.5" /> Auto-Generate
-                    </button>
-                  </div>
-                  <div className="relative flex items-center bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2">
-                    <Key className="h-3.5 w-3.5 text-slate-400 mr-2 shrink-0" />
-                    <input
-                      type="text"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="bg-transparent text-xs outline-none text-slate-900 dark:text-white w-full font-mono font-bold"
-                    />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRole("PROJECT_MANAGER");
+                      if (department === "Human Resources") setDepartment("Product");
+                      if (designation === "Software Engineer" || designation === "HR Administrator") setDesignation("Technical Project Manager");
+                    }}
+                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
+                      role === "PROJECT_MANAGER"
+                        ? "bg-amber-50/80 dark:bg-amber-950/30 border-amber-500/50 shadow-xs ring-1 ring-amber-500/30"
+                        : "bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 opacity-70"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400">
+                        <Briefcase className="h-4 w-4" />
+                      </div>
+                      <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300">
+                        PM Lead
+                      </span>
+                    </div>
+                    <div>
+                      <div className="text-xs font-extrabold text-slate-900 dark:text-white">Project Manager</div>
+                      <div className="text-[9px] text-slate-500 dark:text-zinc-400 font-medium leading-tight mt-0.5">
+                        Task delegation, sprint reviews & PM command
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRole("HR");
+                      setDepartment("Human Resources");
+                      setDesignation("HR Administrator");
+                    }}
+                    className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
+                      role === "HR"
+                        ? "bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-500/50 shadow-xs ring-1 ring-emerald-500/30"
+                        : "bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 opacity-70"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400">
+                        <ShieldCheck className="h-4 w-4" />
+                      </div>
+                      <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300">
+                        Admin
+                      </span>
+                    </div>
+                    <div>
+                      <div className="text-xs font-extrabold text-slate-900 dark:text-white">HR Administrator</div>
+                      <div className="text-[9px] text-slate-500 dark:text-zinc-400 font-medium leading-tight mt-0.5">
+                        Staff onboarding, payroll & company governance
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block">
+                    Default Password *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleGeneratePassword}
+                    className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-0.5 cursor-pointer"
+                  >
+                    <Sparkles className="h-2.5 w-2.5" /> Auto-Generate
+                  </button>
+                </div>
+                <div className="relative flex items-center bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2">
+                  <Key className="h-3.5 w-3.5 text-slate-400 mr-2 shrink-0" />
+                  <input
+                    type="text"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="bg-transparent text-xs outline-none text-slate-900 dark:text-white w-full font-mono font-bold"
+                  />
                 </div>
               </div>
             </div>
@@ -444,6 +531,37 @@ export default function HrOnboardingPage() {
                     />
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Step 3: Employee Documents & Google Drive */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                  3. Employee Documents & Dossier
+                </span>
+                <span className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-900">
+                  Google Drive Link
+                </span>
+              </div>
+
+              <div>
+                <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-1">
+                  Google Drive Documents Link (Folder / Document)
+                </label>
+                <div className="relative flex items-center bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2">
+                  <Link2 className="h-3.5 w-3.5 text-indigo-500 mr-2 shrink-0" />
+                  <input
+                    type="url"
+                    placeholder="https://drive.google.com/drive/folders/... or https://docs.google.com/..."
+                    value={documentsUrl}
+                    onChange={(e) => setDocumentsUrl(e.target.value)}
+                    className="bg-transparent text-xs outline-none text-slate-900 dark:text-white w-full font-medium"
+                  />
+                </div>
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Attach shared Google Drive folder containing candidate CV, academic certificates, national ID, and signed employee contract.
+                </p>
               </div>
             </div>
 
@@ -542,12 +660,32 @@ export default function HrOnboardingPage() {
                               ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-400"
                               : "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-400"
                           }`}>
-                            {emp.role === "PROJECT_MANAGER" ? "PM" : emp.role}
+                            {emp.role === "PROJECT_MANAGER" ? "PM" : emp.role === "EMPLOYEE" ? "DEV" : emp.role}
                           </span>
                         </div>
                         <div className="text-[10px] text-slate-400 truncate">{emp.email}</div>
                         <div className="text-[9px] text-slate-500 font-semibold">{emp.designation || emp.department || "Engineering"}</div>
                       </div>
+                    </div>
+
+                    {/* Drive Documents Action */}
+                    <div className="shrink-0 flex items-center">
+                      {emp.documentsUrl ? (
+                        <a
+                          href={emp.documentsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-800/60 text-[10px] font-extrabold transition-all shadow-xs hover:scale-105 active:scale-95"
+                          title="Open Employee Google Drive Documents"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          <span>Drive Docs</span>
+                        </a>
+                      ) : (
+                        <span className="text-[9px] font-semibold text-slate-400 dark:text-zinc-600 px-2 py-1 rounded-lg bg-slate-100 dark:bg-zinc-850">
+                          No Docs
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))

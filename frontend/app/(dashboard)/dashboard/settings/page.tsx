@@ -18,14 +18,15 @@ import {
   MapPin,
   FileText,
   Shield,
-  ShieldCheck,
   Smartphone,
   Laptop,
   Globe,
   Save,
   Clock,
   Sparkles,
-  CheckCircle2
+  CheckCircle2,
+  ExternalLink,
+  Link2
 } from "lucide-react";
 import { useToast } from "@/components/Toast";
 
@@ -40,7 +41,7 @@ interface UserProfile {
   bio?: string;
   location?: string;
   emergencyContact?: string;
-  twoFactorEnabled?: boolean;
+  documentsUrl?: string;
   createdAt?: string;
 }
 
@@ -82,6 +83,7 @@ export default function SettingsPage() {
   const [bio, setBio] = useState("");
   const [location, setLocation] = useState("");
   const [emergencyContact, setEmergencyContact] = useState("");
+  const [documentsUrl, setDocumentsUrl] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
 
   // Security States
@@ -89,8 +91,6 @@ export default function SettingsPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [updatingPassword, setUpdatingPassword] = useState(false);
-  const [twoFactor, setTwoFactor] = useState(false);
-  const [toggling2FA, setToggling2FA] = useState(false);
   const [sessions, setSessions] = useState<ActiveSession[]>([]);
 
   // Preferences States
@@ -131,7 +131,7 @@ export default function SettingsPage() {
           setBio(u.bio || "");
           setLocation(u.location || "");
           setEmergencyContact(u.emergencyContact || "");
-          setTwoFactor(!!u.twoFactorEnabled);
+          setDocumentsUrl(u.documentsUrl || "");
         }
       }
     } catch (err) {
@@ -174,7 +174,8 @@ export default function SettingsPage() {
           designation,
           bio,
           location,
-          emergencyContact
+          emergencyContact,
+          documentsUrl: documentsUrl.trim() || undefined
         }),
         credentials: "include"
       });
@@ -233,31 +234,6 @@ export default function SettingsPage() {
       toast.error("Internal server error.");
     } finally {
       setUpdatingPassword(false);
-    }
-  };
-
-  const handleToggle2FA = async () => {
-    setToggling2FA(true);
-    const nextState = !twoFactor;
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/users/two-factor`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enabled: nextState }),
-        credentials: "include"
-      });
-      const data = await safeJson(res);
-      if (res.ok) {
-        setTwoFactor(nextState);
-        toast.success(nextState ? "Two-Factor Authentication enabled!" : "Two-Factor Authentication disabled.");
-      } else {
-        toast.error(data.error || "Failed to toggle 2FA.");
-      }
-    } catch (err) {
-      console.error("Toggle 2FA error:", err);
-      toast.error("Internal server error.");
-    } finally {
-      setToggling2FA(false);
     }
   };
 
@@ -373,6 +349,19 @@ export default function SettingsPage() {
                     <span>{location}</span>
                   </div>
                 )}
+                {documentsUrl && (
+                  <div className="pt-2 border-t border-slate-100 dark:border-zinc-900">
+                    <a
+                      href={documentsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      <span>View Drive Documents</span>
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -484,6 +473,21 @@ export default function SettingsPage() {
 
                 <div>
                   <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 block mb-1">
+                    Google Drive Documents URL (CV, Certificates, ID, Contract)
+                  </label>
+                  <div className="relative flex items-center">
+                    <input
+                      type="url"
+                      placeholder="https://drive.google.com/drive/folders/... or docs.google.com/..."
+                      value={documentsUrl}
+                      onChange={(e) => setDocumentsUrl(e.target.value)}
+                      className="w-full bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-zinc-950 dark:focus:border-white font-medium"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 block mb-1">
                     Professional Biography
                   </label>
                   <textarea
@@ -516,30 +520,6 @@ export default function SettingsPage() {
       {/* ======================================================== */}
       {activeTab === "SECURITY" && (
         <div className="space-y-6">
-          
-          {/* Two-Factor Authentication Card */}
-          <div className="bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-900 rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">Two-Factor Authentication (2FA)</h3>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
-                Add an extra layer of security to your account with time-based verification codes.
-              </p>
-            </div>
-            <button
-              onClick={handleToggle2FA}
-              disabled={toggling2FA}
-              className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
-                twoFactor 
-                  ? "bg-rose-600 hover:bg-rose-700 text-white shadow-xs" 
-                  : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs"
-              }`}
-            >
-              {twoFactor ? "Disable 2FA" : "Enable 2FA"}
-            </button>
-          </div>
 
           {/* Change Password Card */}
           <div className="bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-900 rounded-2xl p-6 shadow-xs space-y-4">

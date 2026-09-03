@@ -174,6 +174,12 @@ export default function ActiveProjectsPage() {
     onConfirm: () => {}
   });
 
+  // Project Settlement Modal State (HR)
+  const [showSettleModal, setShowSettleModal] = useState(false);
+  const [bonusPercentage, setBonusPercentage] = useState("10");
+  const [customBonusAmount, setCustomBonusAmount] = useState("");
+  const [processingSettlement, setProcessingSettlement] = useState(false);
+
   useEffect(() => {
     if (!sessionLoading && !sessionData) {
       router.push("/login");
@@ -317,6 +323,38 @@ export default function ActiveProjectsPage() {
         }
       }
     });
+  };
+
+  const handleSettlePayout = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedProject) return;
+    setProcessingSettlement(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/projects/${selectedProject.id}/settle-payout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bonusPercentage: customBonusAmount ? undefined : bonusPercentage,
+          bonusAmountPerMember: customBonusAmount || undefined
+        }),
+        credentials: "include"
+      });
+      const data = await safeJson(res);
+      if (res.ok) {
+        toast.success("Project payout settled! Status is now COMPLETED and digital certificates issued.");
+        setShowSettleModal(false);
+        setCustomBonusAmount("");
+        setSelectedProject({ ...selectedProject, status: "COMPLETED" });
+        fetchProjects();
+      } else {
+        toast.error(data.error || "Failed to settle project payout.");
+      }
+    } catch (err) {
+      console.error("Settlement error:", err);
+      toast.error("Internal server error.");
+    } finally {
+      setProcessingSettlement(false);
+    }
   };
 
   const fetchProjectTasks = async (projectId: string) => {
@@ -795,15 +833,39 @@ export default function ActiveProjectsPage() {
                 <span>Project Chat ({channels.length} Channels)</span>
               </button>
 
-              {/* PM Completion Settlement Button */}
-              {(selectedProject.status === "ACTIVE" && (sessionData.user.role === "HR" || selectedProject.manager?.id === sessionData.user.id || selectedProject.managerId === sessionData.user.id)) && (
+              {/* Project Status Action Buttons */}
+              {selectedProject.status === "ACTIVE" && (sessionData.user.role === "HR" || selectedProject.manager?.id === sessionData.user.id || selectedProject.managerId === sessionData.user.id) && (
                 <button
                   onClick={() => handleRequestCompletion(selectedProject.id)}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-2xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
                 >
                   <CheckCircle2 className="h-4 w-4" />
-                  <span>Complete & Settle</span>
+                  <span>Request Completion</span>
                 </button>
+              )}
+
+              {selectedProject.status === "PENDING_SETTLEMENT" && (
+                sessionData.user.role === "HR" ? (
+                  <button
+                    onClick={() => setShowSettleModal(true)}
+                    className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-2xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                  >
+                    <DollarSign className="h-4 w-4" />
+                    <span>Settle Payout & Finalize</span>
+                  </button>
+                ) : (
+                  <span className="bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-400 px-3 py-1.5 rounded-2xl text-xs font-bold flex items-center gap-1.5 border border-amber-300 dark:border-amber-800">
+                    <Clock className="h-3.5 w-3.5 animate-pulse" />
+                    <span>Awaiting HR Settlement</span>
+                  </span>
+                )
+              )}
+
+              {selectedProject.status === "COMPLETED" && (
+                <span className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400 px-3 py-1.5 rounded-2xl text-xs font-bold flex items-center gap-1.5 border border-emerald-300 dark:border-emerald-800">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  <span>Completed & Settled</span>
+                </span>
               )}
             </div>
           </div>
@@ -1474,6 +1536,105 @@ export default function ActiveProjectsPage() {
 
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* HR Settlement & Payout Modal */}
+      {showSettleModal && selectedProject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-900 rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-8 text-left space-y-5 animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-zinc-900">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-900/40">
+                  <DollarSign className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">Project Financial Settlement</h3>
+                  <p className="text-[10px] text-slate-400 font-semibold">{selectedProject.name}</p>
+                </div>
+              </div>
+              <button onClick={() => setShowSettleModal(false)} className="text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="p-4 bg-slate-50 dark:bg-zinc-900/60 rounded-2xl border border-slate-100 dark:border-zinc-850 space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-slate-400 font-semibold">Total Approved Budget:</span>
+                <span className="font-extrabold text-slate-900 dark:text-white">${selectedProject.budget?.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400 font-semibold">Project Lead (PM):</span>
+                <span className="font-bold text-slate-900 dark:text-white">{selectedProject.manager?.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400 font-semibold">Allocated Team Members:</span>
+                <span className="font-bold text-slate-900 dark:text-white">{selectedProject.employees?.length || 1} Engineers</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleSettlePayout} className="space-y-4">
+              <div>
+                <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-1">
+                  Team Performance Bonus Pool (% of Budget)
+                </label>
+                <select
+                  value={bonusPercentage}
+                  onChange={(e) => {
+                    setBonusPercentage(e.target.value);
+                    setCustomBonusAmount("");
+                  }}
+                  className="w-full bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-slate-900 dark:text-white outline-none font-bold cursor-pointer"
+                >
+                  <option value="0">0% — No Additional Team Bonus</option>
+                  <option value="5">5% — Standard Delivery Bonus (${((selectedProject.budget * 0.05) / (selectedProject.employees?.length || 1)).toFixed(0)}/member)</option>
+                  <option value="10">10% — Exceptional Milestone Bonus (${((selectedProject.budget * 0.10) / (selectedProject.employees?.length || 1)).toFixed(0)}/member)</option>
+                  <option value="15">15% — High Velocity Sprint Bonus (${((selectedProject.budget * 0.15) / (selectedProject.employees?.length || 1)).toFixed(0)}/member)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-1">
+                  Or Fixed Bonus Amount Per Team Member ($ USD)
+                </label>
+                <input
+                  type="number"
+                  placeholder="e.g. 500"
+                  value={customBonusAmount}
+                  onChange={(e) => setCustomBonusAmount(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-slate-900 dark:text-white outline-none font-mono font-bold"
+                />
+              </div>
+
+              <div className="p-3 bg-emerald-50/60 dark:bg-emerald-950/20 rounded-xl border border-emerald-200/60 dark:border-emerald-900/40 text-[10px] text-emerald-800 dark:text-emerald-300 font-medium">
+                ✓ Approving settlement marks the project as <strong>COMPLETED</strong>, records financial ledger payouts, and automatically issues cryptographic digital achievement certificates to all team members.
+              </div>
+
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-zinc-900">
+                <button
+                  type="button"
+                  onClick={() => setShowSettleModal(false)}
+                  className="bg-slate-100 dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 font-bold py-2 px-4 rounded-xl text-xs cursor-pointer hover:bg-slate-200 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={processingSettlement}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-5 rounded-xl text-xs flex items-center gap-1.5 cursor-pointer shadow-md transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+                >
+                  {processingSettlement ? (
+                    <span>Settling & Issuing Certificates...</span>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span>Approve Settlement & Finalize</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

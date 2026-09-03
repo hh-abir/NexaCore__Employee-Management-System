@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 
 export const onboardEmployee = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { name, email, role, password, department, designation, phone, salary } = req.body;
+    const { name, email, role, password, department, designation, phone, salary, documentsUrl } = req.body;
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -26,6 +26,7 @@ export const onboardEmployee = async (req: AuthenticatedRequest, res: Response) 
           department: department ? department.trim() : "Engineering",
           designation: designation ? designation.trim() : "Software Engineer",
           phone: phone ? phone.trim() : null,
+          documentsUrl: documentsUrl ? documentsUrl.trim() : null,
         },
       });
 
@@ -67,6 +68,7 @@ export const onboardEmployee = async (req: AuthenticatedRequest, res: Response) 
         role: newUser.role,
         department: newUser.department,
         designation: newUser.designation,
+        documentsUrl: newUser.documentsUrl,
       },
     });
   } catch (error: any) {
@@ -91,6 +93,7 @@ export const getAllEmployees = async (req: AuthenticatedRequest, res: Response) 
         department: true,
         designation: true,
         phone: true,
+        documentsUrl: true,
         createdAt: true,
       }
     });
@@ -122,10 +125,7 @@ export const getHRSummary = async (req: AuthenticatedRequest, res: Response) => 
       prisma.payroll.findMany({ select: { netSalary: true, status: true } }),
       prisma.project.findMany({
         where: {
-          OR: [
-            { status: "PENDING_SETTLEMENT" },
-            { status: "ACTIVE" }
-          ]
+          status: "PENDING_SETTLEMENT"
         },
         include: {
           manager: { select: { id: true, name: true, email: true } },

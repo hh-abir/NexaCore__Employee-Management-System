@@ -90,7 +90,15 @@ export default function DashboardHeader() {
   useEffect(() => {
     setMounted(true);
     if (typeof window !== "undefined") {
-      setIsDark(document.documentElement.classList.contains("dark"));
+      const storedTheme = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const shouldBeDark = storedTheme === "dark" || (!storedTheme && prefersDark);
+      setIsDark(shouldBeDark);
+      if (shouldBeDark) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
     }
   }, []);
 
@@ -124,8 +132,10 @@ export default function DashboardHeader() {
     setIsDark(nextDark);
     if (nextDark) {
       document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
     } else {
       document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
     }
   };
 
