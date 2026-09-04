@@ -6,13 +6,15 @@ import {
   getAttendanceStatus,
   getAttendanceHistory,
   createManualAttendance,
-  deleteAttendanceRecord
+  deleteAttendanceRecord,
+  resetTodayShift
 } from "../controllers/attendanceController";
 
 const router = Router();
 
 router.post("/clock-in", roleGuard(["HR", "PROJECT_MANAGER", "EMPLOYEE"]), clockIn);
 router.post("/clock-out", roleGuard(["HR", "PROJECT_MANAGER", "EMPLOYEE"]), clockOut);
+router.post("/reset-today", roleGuard(["HR", "PROJECT_MANAGER", "EMPLOYEE"]), resetTodayShift);
 router.get("/status", roleGuard(["HR", "PROJECT_MANAGER", "EMPLOYEE"]), getAttendanceStatus);
 router.get("/history", roleGuard(["HR", "PROJECT_MANAGER", "EMPLOYEE"]), getAttendanceHistory);
 router.post("/manual-entry", roleGuard(["HR"]), createManualAttendance);

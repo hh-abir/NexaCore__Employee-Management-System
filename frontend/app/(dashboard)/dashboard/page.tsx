@@ -33,7 +33,8 @@ import {
   MessageSquare,
   BookOpen,
   Trash2,
-  FileCode
+  FileCode,
+  RotateCw
 } from "lucide-react";
 import { useToast } from "@/components/Toast";
 
@@ -494,6 +495,27 @@ export default function DashboardPage() {
       }
     } catch (err: any) {
       toast.error(err.message || "Could not retrieve GPS coordinates.");
+    } finally {
+      setLoadingAttendance(false);
+    }
+  };
+
+  const handleResetTodayShift = async () => {
+    setLoadingAttendance(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/attendance/reset-today`, {
+        method: "POST",
+        credentials: "include"
+      });
+      const data = await safeJson(res);
+      if (res.ok) {
+        toast.success("Today's shift reset! You can now test Clock In again.");
+        fetchAttendanceStatus();
+      } else {
+        toast.error(data.error || "Failed to reset today's shift.");
+      }
+    } catch (err) {
+      toast.error("Internal server error.");
     } finally {
       setLoadingAttendance(false);
     }
@@ -1141,12 +1163,12 @@ export default function DashboardPage() {
               )}
             </div>
 
-            <div className="space-y-2 pt-2">
+            <div className="space-y-2 pt-1">
               {!clockedIn ? (
                 <button
                   onClick={handleClockIn}
                   disabled={loadingAttendance}
-                  className="w-full bg-zinc-950 hover:bg-zinc-900 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 font-bold py-2.5 px-4 rounded-xl text-xs cursor-pointer shadow-xs transition-colors"
+                  className="w-full bg-zinc-950 hover:bg-zinc-900 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-zinc-950 font-bold py-2.5 px-4 rounded-xl text-xs cursor-pointer shadow-xs transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
                 >
                   {loadingAttendance ? "Verifying GPS Perimeter..." : "Clock In (Geofenced)"}
                 </button>
@@ -1154,7 +1176,7 @@ export default function DashboardPage() {
                 <button
                   onClick={handleClockOut}
                   disabled={loadingAttendance}
-                  className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs cursor-pointer shadow-xs transition-colors"
+                  className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs cursor-pointer shadow-xs transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
                 >
                   {loadingAttendance ? "Recording Departure..." : "Clock Out"}
                 </button>
@@ -1162,6 +1184,19 @@ export default function DashboardPage() {
                 <div className="py-2.5 text-center text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 rounded-xl border border-emerald-200 dark:border-emerald-900/50">
                   ✓ Today's Shift Completed
                 </div>
+              )}
+
+              {/* Reset Shift Button for Testing & Capstone Demonstration */}
+              {(clockedIn || clockedOut) && (
+                <button
+                  onClick={handleResetTodayShift}
+                  disabled={loadingAttendance}
+                  className="w-full text-center text-[11px] font-bold text-slate-500 hover:text-rose-600 dark:text-zinc-400 dark:hover:text-rose-400 py-1.5 flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                  title="Reset today's shift to test Clock In again"
+                >
+                  <RotateCw className={`h-3 w-3 ${loadingAttendance ? "animate-spin" : ""}`} />
+                  <span>Reset Today's Shift (Test Again)</span>
+                </button>
               )}
             </div>
           </div>

@@ -9,7 +9,7 @@ const BRAC_LON = 90.4254;
 const ALLOWED_RADIUS_METERS = 200;
 
 // Haversine Formula for distance checking
-function isInsideBrac(lat: number, lon: number): boolean {
+function calculateDistanceFromBrac(lat: number, lon: number): number {
   const R = 6371e3; // Earth radius in meters
   const phi1 = (lat * Math.PI) / 180;
   const phi2 = (BRAC_LAT * Math.PI) / 180;
@@ -21,9 +21,7 @@ function isInsideBrac(lat: number, lon: number): boolean {
     Math.cos(phi1) * Math.cos(phi2) * Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-  const distance = R * c;
-  console.log(`Calculated distance to BRAC University: ${distance.toFixed(1)}m`);
-  return distance <= ALLOWED_RADIUS_METERS;
+  return R * c;
 }
 
 export const clockIn = async (req: AuthenticatedRequest, res: Response) => {
@@ -42,8 +40,16 @@ export const clockIn = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     // Geofencing verification
-    if (!isInsideBrac(latNum, lonNum)) {
-      return res.status(403).json({ error: "Access Denied: You must be physically present at the BRAC University campus to clock in." });
+    const distanceMeters = calculateDistanceFromBrac(latNum, lonNum);
+    console.log(`[Geofence Clock In] User ${req.user!.email} distance: ${distanceMeters.toFixed(1)}m (Threshold: ${ALLOWED_RADIUS_METERS}m)`);
+
+    if (distanceMeters > ALLOWED_RADIUS_METERS) {
+      const formattedDist = distanceMeters >= 1000 
+        ? `${(distanceMeters / 1000).toFixed(2)} km` 
+        : `${Math.round(distanceMeters)} meters`;
+      return res.status(403).json({ 
+        error: `Access Denied: Geofence violation. You are ${formattedDist} away from BRAC University campus (23.7725° N, 90.4254° E). You must be physically within ${ALLOWED_RADIUS_METERS}m to clock in.` 
+      });
     }
 
     const todayStr = new Date().toLocaleDateString("sv-SE"); // sv-SE outputs "YYYY-MM-DD"
@@ -108,8 +114,16 @@ export const clockOut = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     // Geofencing verification
-    if (!isInsideBrac(latNum, lonNum)) {
-      return res.status(403).json({ error: "Access Denied: You must be physically present at the BRAC University campus to clock out." });
+    const distanceMeters = calculateDistanceFromBrac(latNum, lonNum);
+    console.log(`[Geofence Clock Out] User ${req.user!.email} distance: ${distanceMeters.toFixed(1)}m (Threshold: ${ALLOWED_RADIUS_METERS}m)`);
+
+    if (distanceMeters > ALLOWED_RADIUS_METERS) {
+      const formattedDist = distanceMeters >= 1000 
+        ? `${(distanceMeters / 1000).toFixed(2)} km` 
+        : `${Math.round(distanceMeters)} meters`;
+      return res.status(403).json({ 
+        error: `Access Denied: Geofence violation. You are ${formattedDist} away from BRAC University campus (23.7725° N, 90.4254° E). You must be physically within ${ALLOWED_RADIUS_METERS}m to clock out.` 
+      });
     }
 
     const todayStr = new Date().toLocaleDateString("sv-SE");
@@ -293,6 +307,22 @@ export const deleteAttendanceRecord = async (req: AuthenticatedRequest, res: Res
     return res.status(200).json({ message: "Attendance record deleted successfully." });
   } catch (err) {
     console.error("Delete Attendance Error:", err);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+export const resetTodayShift = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const todayStr = new Date().toLocaleDateString("sv-SE");
+    await prisma.attendance.deleteMany({
+      where: {
+        userId: req.user!.id,
+        date: todayStr
+      }
+    });
+    return res.status(200).json({ message: "Today's shift reset successfully! You can now clock in again." });
+  } catch (err) {
+    console.error("Reset Today Shift Error:", err);
     return res.status(500).json({ error: "Internal server error." });
   }
 };

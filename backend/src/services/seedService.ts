@@ -399,10 +399,10 @@ export async function runDatabaseSeed() {
   // 6. GEOFENCED ATTENDANCE LOGS (BRAC University Campus)
   // ---------------------------------------------------------
   const pastDays = [
+    "2026-08-31",
     "2026-09-01",
     "2026-09-02",
-    "2026-09-03",
-    "2026-09-04"
+    "2026-09-03"
   ];
 
   for (const dateStr of pastDays) {
