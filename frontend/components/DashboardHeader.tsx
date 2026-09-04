@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { 
   Bell, 
-  Search, 
   Sun, 
   Moon, 
   Menu, 
@@ -66,7 +65,6 @@ export default function DashboardHeader() {
   const [loadingNotifs, setLoadingNotifs] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
 
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -137,13 +135,6 @@ export default function DashboardHeader() {
       document.documentElement.classList.remove("dark");
       localStorage.setItem("theme", "light");
     }
-  };
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-    toast.info(`Searching for: "${searchQuery}"`);
-    setSearchQuery("");
   };
 
   const handleMarkAllAsRead = async () => {
@@ -244,7 +235,7 @@ export default function DashboardHeader() {
   return (
     <header className="sticky top-0 z-40 w-full h-16 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white flex items-center justify-between px-8 select-none transition-colors duration-150 font-sans shadow-xs border-b border-slate-50 dark:border-zinc-900/60">
       
-      {/* Left side items: Menu & Search */}
+      {/* Left side items: Menu */}
       <div className="flex items-center space-x-4">
         <button 
           onClick={() => toast.info("Sidebar is locked in expanded desktop layout.")}
@@ -252,17 +243,6 @@ export default function DashboardHeader() {
         >
           <Menu className="h-4.5 w-4.5" />
         </button>
-
-        <form onSubmit={handleSearchSubmit} className="relative flex items-center bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 w-64 focus-within:border-zinc-900 dark:focus-within:border-white transition-all shadow-xs">
-          <Search className="h-3.5 w-3.5 text-slate-400 mr-2 shrink-0" />
-          <input
-            type="text"
-            placeholder="Search anything..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent text-[11px] outline-none text-zinc-900 dark:text-white w-full font-semibold"
-          />
-        </form>
       </div>
 
       {/* Right side items: Actions & Profiling */}
